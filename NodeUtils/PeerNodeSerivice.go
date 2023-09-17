@@ -19,7 +19,7 @@ func register(nodestru Nodestructure, msg []byte) (err error) {
 		return fmt.Errorf("register unmarshal error:%v", err)
 	}
 	// prikeyPath := sdkInit.GenerateKey(userif.UserId)
-	pubkey := &sdkInit.GetClientPrivateKey("/home/go/src/fabric_in_edge-cloud/kafka_crypto/ianhui.private.pem").PublicKey
+	pubkey := &sdkInit.GetClientPrivateKey("./kafka_crypto/ianhui.private.pem").PublicKey
 	userif.PublicKey = sdkInit.ConversionEcdsaPub2MyPub(pubkey)
 	ret, err := clients.GetPeerFabric(nodestru.PeerNodeName, "user").SetUserInfo(userif)
 	if err != nil {
@@ -55,14 +55,9 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("marshal error:%v", err)
 	}
-	//get center addr
-	center_addrs := GetCenterKafkaAddrInZookeeper() //in this example we set only one center
-	if len(center_addrs) == 0 {
-		return fmt.Errorf("get center addr error:%v", err)
-	}
 
 	topic := "uploadposition" //操作名
-	err = ProducerAsyncSending(res, topic, center_addrs[0])
+	err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
 	if err != nil {
 		return fmt.Errorf("producer async sending err:%v", err)
 	}
@@ -138,16 +133,13 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 			}
 
 			//send position to center
-			center_addr := GetCenterKafkaAddrInZookeeper()
-			if len(center_addr) == 0 {
-				return fmt.Errorf("get center addr error")
-			}
+
 			res, err := json.Marshal(k_pos)
 			if err != nil {
 				return fmt.Errorf("marshal error:%v", err)
 			}
 			topic := "UploadKeyPosition"
-			err = ProducerAsyncSending(res, topic, center_addr[0])
+			err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
 			if err != nil {
 				return fmt.Errorf("producer async sending err:%v", err)
 			}
@@ -198,12 +190,6 @@ func filerequest(nodestru Nodestructure, msg []byte) (err error) {
 		filereqstru.Kafka_addr = nodestru.KafkaIp
 	}
 
-	//从zk中获取center地址
-	center_addr := GetCenterKafkaAddrInZookeeper() //in this example we set only one center
-	if len(center_addr) == 0 {
-		return fmt.Errorf("get center addr error:%v", err)
-	}
-
 	//ciphertext request
 	res, err := json.Marshal(filereqstru)
 	if err != nil {
@@ -215,7 +201,7 @@ func filerequest(nodestru Nodestructure, msg []byte) (err error) {
 		if kivik.StatusCode(err) == 404 {
 			//QUERY CENTER
 			topic := "FileReqestToCenter"
-			err = ProducerAsyncSending(res, topic, center_addr[0])
+			err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
 			if err != nil {
 				return fmt.Errorf("producer async sending err:%v", err)
 			}
@@ -239,7 +225,7 @@ func filerequest(nodestru Nodestructure, msg []byte) (err error) {
 	//key request
 	//key request sended to center to forward
 	topic := "KeyReqForwarding" //操作名
-	err = ProducerAsyncSending(res, topic, center_addr[0])
+	err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
 	if err != nil {
 		fmt.Println("producer async sending err:", err)
 	}
@@ -359,16 +345,11 @@ func receiveFileRequestFormCenter(nodestru Nodestructure, msg []byte) (err error
 			return fmt.Errorf("marshal error:%v", err)
 		}
 		//get center addr
-		center_addrs := GetCenterKafkaAddrInZookeeper() //in this example we set only one center
-		if len(center_addrs) == 0 {
-			return fmt.Errorf("get center addr error:%v", err)
+		err = ProducerAsyncSending(res, "uploadposition", nodestru.CenterAddr)
+		if err != nil {
+			return fmt.Errorf("producer async sending err:%v", err)
 		}
-		for _, center_addr := range center_addrs {
-			err = ProducerAsyncSending(res, "uploadposition", center_addr)
-			if err != nil {
-				return fmt.Errorf("producer async sending err:%v", err)
-			}
-		}
+
 	}
 	return nil
 }
@@ -410,12 +391,7 @@ func time2transmit(fileif FileInfo, nodestru Nodestructure) {
 	timers.Store(fileif.FileId, time.AfterFunc(transmitTime, func() {
 		// 到时间后执行的代码
 		//begin to send to center
-		center_addr := GetCenterKafkaAddrInZookeeper()
-		if len(center_addr) == 0 {
-			fmt.Println("not found center_addr in zookeeper")
-			return
-		}
-		CipherPosTransfer(fileif.FileId, nodestru, center_addr[0])
+		CipherPosTransfer(fileif.FileId, nodestru, nodestru.CenterAddr)
 		// 删除计时器
 		timers.Delete(fileif.FileId)
 	}))

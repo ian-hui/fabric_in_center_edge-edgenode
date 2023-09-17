@@ -2,13 +2,12 @@ package NodeUtils
 
 import (
 	"fabric-edgenode/sdkInit"
+	"os"
 
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -67,39 +66,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 	Option := choose[0]
 	kafka_ip := choose[1]
 	if Option == "1" {
-
-		// guidance_Message := "先输入attribute(用逗号分隔)"
-		// err = ws.WriteJSON(guidance_Message)
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		//存attribute
-		// _, msg, err := ws.ReadMessage()
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// Attribute := strings.Split(string(msg), ",")
-
 		Attribute := Test_data1.Attribute
-
-		// err = ws.WriteJSON("输入[userid,user密钥地址,fileid]")
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// //放userid和密钥位置
-		// _, msg, err = ws.ReadMessage()
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// userid_userkey_fileid := strings.Split(string(msg), ",")
-		// User_id := userid_userkey_fileid[0]
-		// user_key_path := userid_userkey_fileid[1]
-		// file_id := userid_userkey_fileid[2]
-
 		User_id := Test_data1.Username
 		user_key_path := Test_data1.Userkeypath
 		file_id := Test_data1.Fileid
@@ -145,129 +112,35 @@ func HandleWebsocket(ws *websocket.Conn) {
 		ws.WriteJSON("SUCCESS")
 		return
 
-		// for {
-		// 	i := 0
-		// 	ws.WriteJSON("end or not")
-		// 	_, msg, err := ws.ReadMessage()
-		// 	if err != nil {
-		// 		log.Println(err)
-		// 		break
-		// 	}
-		// 	if string(msg) == "end" {
-		// 		keyuploadinfo := KeyUploadInfo{
-		// 			Upload_Infomation: &upload_infomation,
-		// 			Attribute:         Attribute,
-		// 		}
-		// 		res, err := json.Marshal(keyuploadinfo)
-		// 		if err != nil {
-		// 			log.Printf("fail to Serialization, err:%v\n", err)
-		// 			return
-		// 		}
-		// 		topic := "KeyUpload" //操作名
-		// 		err = ProducerAsyncSending(res, topic, kafka_ip)
-		// 		if err != nil {
-		// 			err := ws.WriteJSON(err)
-		// 			if err != nil {
-		// 				log.Println("writejson error :", err)
-		// 			}
-		// 		}
-		// 		ws.WriteJSON("SUCCESS")
-		// 		break
-		// 	} else {
-		// 		ws.WriteJSON("输入[节点密钥地址]")
-		// 		_, msg, err := ws.ReadMessage()
-		// 		if err != nil {
-		// 			log.Println(err)
-		// 			break
-		// 		}
-		// 		node_key_path := string(msg)
-		// 		pubkey := &sdkInit.GetNodePrivateKey(node_key_path).PublicKey
-		// 		encrypted, sign_len := sdkInit.ClientEncryptionByPubECC(user_key_path, pubkey, secrets[i])
-		// 		ws.WriteJSON("输入[kafkaIP]")
-		// 		_, msg, err = ws.ReadMessage()
-		// 		if err != nil {
-		// 			log.Println(err)
-		// 			break
-		// 		}
-		// 		kafkaip := string(msg)
-		// 		upload_infomation[kafkaip] = KeyDetailInfo{
-		// 			FileId:  file_id,
-		// 			Key:     encrypted,
-		// 			Signlen: sign_len,
-		// 			UserId:  User_id,
-		// 		}
-		// 		i++
-		// 	}
-		// }
 	}
 	//request for file and key
 	if Option == "2" {
-		// err = ws.WriteJSON("输入[fileid]")
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// _, msg, err := ws.ReadMessage()
-		// if err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// str := string(msg)
-		err = ws.WriteJSON("输入[concurrent_time]")
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		_, msg, err := ws.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		concurrent_time, _ := strconv.Atoi(string(msg))
-		err = ws.WriteJSON("输入[node_range]")
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		_, msg, err = ws.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		node_range, _ := strconv.Atoi(string(msg))
 		startTime := time.Now()
 		userid := "ianhui"
 		fileid := "1"
-		//test 50 times
-		for i := 0; i < concurrent_time; i++ {
-			kafka_test_port := 9092 + rand.Intn(node_range)
-			kafka_test_ip := "0.0.0.0:" + strconv.Itoa(kafka_test_port)
-			//set userid and bind the websocket conn and userid
-			// Create a new channel for the user if it doesn't exist
-			if _, ok := sendDataChannels.Load(userid); !ok {
-				sendDataChannels.Store(userid, make(chan interface{}, 100))
-			}
-			// send request to kafka
-			FilerequestStruct := FileRequest{
-				FileId: fileid,
-				UserId: userid,
-			}
-			res, err := json.Marshal(FilerequestStruct)
+		//set userid and bind the websocket conn and userid
+		// Create a new channel for the user if it doesn't exist
+		if _, ok := sendDataChannels.Load(userid); !ok {
+			sendDataChannels.Store(userid, make(chan interface{}, 100))
+		}
+		// send request to kafka
+		FilerequestStruct := FileRequest{
+			FileId: fileid,
+			UserId: userid,
+		}
+		res, err := json.Marshal(FilerequestStruct)
+		if err != nil {
+			fmt.Printf("fail to Serialization, err:%v\n", err)
+			return
+		}
+		topic := "filereq"
+		err = ProducerAsyncSending(res, topic, os.Getenv("KAFKA_IP"))
+		if err != nil {
+			err := ws.WriteJSON(err)
 			if err != nil {
-				fmt.Printf("fail to Serialization, err:%v\n", err)
-				return
+				log.Println("writejson error :", err)
 			}
-			topic := "filereq"
-			go func(topic string, res []byte, kafka_test_ip string) {
-				err = ProducerAsyncSending(res, topic, kafka_test_ip)
-				if err != nil {
-					err := ws.WriteJSON(err)
-					if err != nil {
-						log.Println("writejson error :", err)
-					}
-					return
-				}
-			}(topic, res, kafka_test_ip)
+			return
 		}
 
 		//receive data from kafka
@@ -279,8 +152,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 					case <-conn:
 						// fmt.Println(data)
 						temp++
-						fmt.Println("userid", temp)
-						if temp == 4*concurrent_time {
+						if temp == 4 {
 							duration := time.Since(startTime)
 							fmt.Println("the duration is ", duration)
 							resu = resu + int64(duration/time.Millisecond)

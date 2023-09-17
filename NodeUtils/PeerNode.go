@@ -29,7 +29,7 @@ func InitPeerNode(topics []string, nodestru Nodestructure) {
 	//init kafka producer
 	clients.InitProducer(nodestru.KafkaIp)
 	//init peer sdk
-	clients.InitPeerSdk(nodestru.PeerNodeName, nodestru.OrgID, nodestru.ConfigPath)
+	clients.InitPeerSdk(nodestru.PeerNodeName, nodestru.OrgID, "./conf/config.yaml")
 	//create db in couchdb
 	Create_cipherkey_info(nodestru)
 	Create_ciphertext_info(nodestru)

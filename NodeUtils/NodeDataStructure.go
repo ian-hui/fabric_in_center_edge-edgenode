@@ -11,6 +11,7 @@ type Nodestructure struct {
 	PeerNodeName     string
 	OrgID            string
 	KeyPath          string
+	CenterAddr       string
 	ConfigPath       string
 	NodeInfo         *NodeInfo
 	UserChannel_info *sdkInit.SdkEnvInfo

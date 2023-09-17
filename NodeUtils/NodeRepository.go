@@ -215,27 +215,27 @@ func GetAllPeerAddrInZookeeper() []string {
 	return kafka_addr
 }
 
-func GetCenterKafkaAddrInZookeeper() []string {
-	var res map[string]interface{}
-	center_kafka_addr := make([]string, 0, 4)
-	conn := clients.ZookeeperConns
-	children, _, err := conn.Children("/center/brokers/ids")
-	if err != nil {
-		panic(err)
-	}
+// func GetCenterKafkaAddrInZookeeper() []string {
+// 	var res map[string]interface{}
+// 	center_kafka_addr := make([]string, 0, 4)
+// 	conn := clients.ZookeeperConns
+// 	children, _, err := conn.Children("/center/brokers/ids")
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	for _, child := range children {
-		data, _, err := conn.Get("/center/brokers/ids/" + child)
-		if err != nil {
-			panic(err)
-		}
-		json.Unmarshal(data, &res)
-		temp := res["port"].(float64)
-		port := strconv.FormatFloat(temp, 'f', 0, 64)
-		center_kafka_addr = append(center_kafka_addr, "0.0.0.0:"+port)
-	}
-	return center_kafka_addr
-}
+// 	for _, child := range children {
+// 		data, _, err := conn.Get("/center/brokers/ids/" + child)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		json.Unmarshal(data, &res)
+// 		temp := res["port"].(float64)
+// 		port := strconv.FormatFloat(temp, 'f', 0, 64)
+// 		center_kafka_addr = append(center_kafka_addr, "0.0.0.0:"+port)
+// 	}
+// 	return center_kafka_addr
+// }
 
 func CheckNotExistence(f string, nodestru Nodestructure, dbname string) bool {
 	_, err := Getinfo(f, nodestru, dbname)

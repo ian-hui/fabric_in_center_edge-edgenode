@@ -1,8 +1,6 @@
 package clients
 
-import (
-	"fabric-edgenode/sdkInit"
-)
+import "fabric-edgenode/sdkInit"
 
 var (
 	Orgs_userinfoChannel = []*sdkInit.OrgInfo{
@@ -12,7 +10,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org1MSPanchors_ChannelOne.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_userinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -20,14 +18,15 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org2MSPanchors_ChannelOne.tx",
-		}, {
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_userinfoChannel.tx",
+		},
+		{
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org3MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_userinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -35,7 +34,7 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org4MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_userinfoChannel.tx",
 		},
 	}
 
@@ -46,7 +45,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org1MSPanchors_ChannelOne.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_accessChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -54,14 +53,14 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org2MSPanchors_ChannelOne.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_accessChannel.tx",
 		}, {
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org3MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_accessChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -69,7 +68,7 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org4MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_accessChannel.tx",
 		},
 	}
 
@@ -80,7 +79,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org1MSPanchors_ChannelOne.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_nodeinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -88,14 +87,14 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org2MSPanchors_ChannelOne.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_nodeinfoChannel.tx",
 		}, {
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org3MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_nodeinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -103,14 +102,14 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "./fixtures/channel-artifacts/Org4MSPanchors_ChannelOneAreaTwo.tx",
+			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_nodeinfoChannel.tx",
 		},
 	}
 
 	//init sdk env info
-	userinfoChannel_info = sdkInit.SdkEnvInfo{
-		ChannelID:        "myUserinfoChannel",
-		ChannelConfig:    "./fixtures/channel-artifacts/channel1.tx",
+	UserinfoChannel_info = sdkInit.SdkEnvInfo{
+		ChannelID:        "myuserinfochannel",
+		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/userinfoChannel.tx",
 		Orgs:             Orgs_userinfoChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
@@ -119,9 +118,9 @@ var (
 		ChaincodePath:    "./chaincode/",
 		ChaincodeVersion: "1.0.0",
 	}
-	accessChannel_info = sdkInit.SdkEnvInfo{
-		ChannelID:        "myAccessChannel",
-		ChannelConfig:    "./fixtures/channel-artifacts/channel2.tx",
+	AccessChannel_info = sdkInit.SdkEnvInfo{
+		ChannelID:        "myaccesschannel",
+		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/accessChannel.tx",
 		Orgs:             Orgs_accessChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
@@ -130,14 +129,14 @@ var (
 		ChaincodePath:    "./chaincode/",
 		ChaincodeVersion: "1.0.0",
 	}
-	nodeinfoChannel_info = sdkInit.SdkEnvInfo{
-		ChannelID:        "mychannel3",
-		ChannelConfig:    "./fixtures/channel-artifacts/channel3.tx",
+	NodeinfoChannel_info = sdkInit.SdkEnvInfo{
+		ChannelID:        "mynodeinfochannel",
+		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/nodeinfoChannel.tx",
 		Orgs:             Orgs_nodeinfoChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
 		OrdererEndpoint:  "orderer.example.com",
-		ChaincodeID:      "user_information_2",
+		ChaincodeID:      "nodeinfo_channel",
 		ChaincodePath:    "./chaincode/",
 		ChaincodeVersion: "1.0.0",
 	}
