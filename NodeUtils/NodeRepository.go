@@ -10,13 +10,13 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/Shopify/sarama"
 	"github.com/fatih/structs"
 	_ "github.com/go-kivik/couchdb/v4"   // The CouchDB driver
 	kivik "github.com/go-kivik/kivik/v4" //couchdb-go第三方库
+	"github.com/segmentio/kafka-go"
 )
 
-func Create_ciphertext_info(nodestru Nodestructure) error { //create db in couchdb
+func (nodestru Nodestructure) Create_ciphertext_info() error { //create db in couchdb
 	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
 	if err != nil {
 		return fmt.Errorf("get couchdb client error: %v", err)
@@ -29,7 +29,7 @@ func Create_ciphertext_info(nodestru Nodestructure) error { //create db in couch
 	return nil
 }
 
-func Create_cipherkey_info(nodestru Nodestructure) error { //create db in couchdb
+func (nodestru Nodestructure) Create_cipherkey_info() error { //create db in couchdb
 	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
 	if err != nil {
 		return fmt.Errorf("get couchdb client error: %v", err)
@@ -215,28 +215,6 @@ func GetAllPeerAddrInZookeeper() []string {
 	return kafka_addr
 }
 
-// func GetCenterKafkaAddrInZookeeper() []string {
-// 	var res map[string]interface{}
-// 	center_kafka_addr := make([]string, 0, 4)
-// 	conn := clients.ZookeeperConns
-// 	children, _, err := conn.Children("/center/brokers/ids")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	for _, child := range children {
-// 		data, _, err := conn.Get("/center/brokers/ids/" + child)
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		json.Unmarshal(data, &res)
-// 		temp := res["port"].(float64)
-// 		port := strconv.FormatFloat(temp, 'f', 0, 64)
-// 		center_kafka_addr = append(center_kafka_addr, "0.0.0.0:"+port)
-// 	}
-// 	return center_kafka_addr
-// }
-
 func CheckNotExistence(f string, nodestru Nodestructure, dbname string) bool {
 	_, err := Getinfo(f, nodestru, dbname)
 	if err != nil {
@@ -249,34 +227,14 @@ func CheckNotExistence(f string, nodestru Nodestructure, dbname string) bool {
 }
 
 func ProducerAsyncSending(messages []byte, topic string, kafka_addr string) error {
-	kafka_client, err := clients.GetProducer(kafka_addr)
+	kafka_client := clients.GetProducer(kafka_addr)
+	err := kafka_client.WriteMessages(context.Background(), kafka.Message{
+		Topic: topic,
+		Value: messages,
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("write messages error: %v", err)
 	}
-	msg := &sarama.ProducerMessage{}
-	msg.Topic = topic
-	err = AsyncSend2Kafka(kafka_client, msg, messages)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// 异步发函数函数
-func AsyncSend2Kafka(client sarama.AsyncProducer, msg *sarama.ProducerMessage, content []byte) error {
-	msg.Value = sarama.StringEncoder(content)
-
-	// 发送消息
-	client.Input() <- msg
-	go func() {
-		select {
-		case success := <-client.Successes():
-			fmt.Println("message sent successfully")
-			fmt.Printf("partition:%v offset:%v\n", success.Partition, success.Offset)
-		case err := <-client.Errors():
-			panic(err)
-		}
-	}()
 	return nil
 }
 
