@@ -33,8 +33,8 @@ type FileRequest struct {
 	FileId string `json:"FileId"`
 	UserId string `json:"UserId"`
 	// AreaId      string `json:"AreaId"`
-	Kafka_addr  string `json:"kafka_addr"`
-	storageFlag bool   `json:"storageFlag"`
+	Kafka_addr string `json:"kafka_addr"`
+	// storageFlag bool   `json:"storageFlag"`
 }
 
 type FileRequestDTO struct {

@@ -58,6 +58,7 @@ channels:
       - orderer2.example.com
       - orderer3.example.com
       - orderer4.example.com
+
     peers:
       peer0.org1.example.com:
         endorsingPeer: true
@@ -128,6 +129,7 @@ channels:
       - orderer2.example.com
       - orderer3.example.com
       - orderer4.example.com
+      
     peers:
       peer0.org1.example.com:
         endorsingPeer: true

@@ -17,7 +17,7 @@ FROM debian:bullseye-slim
 # 从builder镜像中把配置文件拷贝到当前目录
 COPY ./cfg /conf
 COPY ./kafka_crypto /kafka_crypto
-COPY ./fixtures ./fixtures
+COPY ./fixtures /fixtures
 
 # 从builder镜像中把二进制文件拷贝到当前目录
 COPY --from=builder /build/fabric-edgenode /
