@@ -19,7 +19,7 @@ func register(nodestru Nodestructure, msg []byte) (err error) {
 		return fmt.Errorf("register unmarshal error:%v", err)
 	}
 	// prikeyPath := sdkInit.GenerateKey(userif.UserId)
-	pubkey := &sdkInit.GetClientPrivateKey("./kafka_crypto/ianhui.private.pem").PublicKey
+	pubkey := &sdkInit.GetClientPrivateKey("/kafka_crypto/ianhui.private.pem").PublicKey
 	userif.PublicKey = sdkInit.ConversionEcdsaPub2MyPub(pubkey)
 	ret, err := clients.GetPeerFabric(nodestru.PeerNodeName, "user").SetUserInfo(userif)
 	if err != nil {
@@ -69,10 +69,13 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 func chooseGroup(nodestru Nodestructure, msg []byte) (err error) {
 	//实例化一个groupchooser
 	gc := &groupChooser{
-		weight:   0.5,
-		Nodestru: nodestru,
+		storage_weight:            0.5,
+		distance_weight:           0.5,
+		standard_deviation_weight: 0.5,
+		curNodeInfo:               nodestru.NodeInfo,
 	}
-	group, err := gc.chooseGroup(6)
+
+	group, delay, sd, err := gc.chooseGroup(6)
 	if err != nil {
 		return fmt.Errorf("choose group error:%v", err)
 	}

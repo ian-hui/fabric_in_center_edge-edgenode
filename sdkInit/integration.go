@@ -70,6 +70,7 @@ func regitserEvent(client *event.Client, chaincodeID string) (fabAPI.Registratio
 
 	return reg, notifier
 }
+
 func ChainCodeEventListener(c *event.Client, ccID string) fabAPI.Registration {
 
 	reg, notifier := regitserEvent(c, ccID)

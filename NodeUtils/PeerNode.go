@@ -29,8 +29,9 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 	clients.InitProducer(nodestru.KafkaIp)
 
 	//initpeer
-	// clients.InitPeerSdk(nodestru.PeerNodeName, nodestru.OrgID, nodestru.ConfigPath)
-
+	if err := clients.InitPeerSdk(nodestru.PeerNodeName, nodestru.OrgID, nodestru.ConfigPath); err != nil {
+		fmt.Println("init peer sdk error:", err)
+	}
 	//create db in couchdb
 	if err := nodestru.Create_cipherkey_info(); err != nil {
 		fmt.Println("create cipherkey_info db error:", err)
@@ -73,6 +74,7 @@ func consumeRegister(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "register", err)
+			return
 		}
 		err = register(nodestru, msg.Value)
 		if err != nil {
@@ -89,6 +91,7 @@ func consumeUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "upload", err)
+			return
 		}
 		err = upload(nodestru, msg.Value)
 		if err != nil {
@@ -104,6 +107,7 @@ func consumeFileReq(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "filereq", err)
+			return
 		}
 		err = filerequest(nodestru, msg.Value)
 		if err != nil {
@@ -119,6 +123,7 @@ func consumeKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "KeyUpload", err)
+			return
 		}
 		err = keyUpload(nodestru, msg.Value)
 		if err != nil {
@@ -134,6 +139,7 @@ func consumeReceiveKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyUpload", err)
+			return
 		}
 		err = receivekeyUpload(nodestru, msg.Value)
 		if err != nil {
@@ -149,6 +155,7 @@ func consumeReceiveKeyReq(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyReq", err)
+			return
 		}
 		err = receivekeyReq(nodestru, msg.Value)
 		if err != nil {
@@ -164,6 +171,7 @@ func consumeDataForwarding(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "DataForwarding", err)
+			return
 		}
 		err = dataForwarding(nodestru, msg.Value)
 		if err != nil {
@@ -179,6 +187,7 @@ func consumeReceiveFileRequestFromCenter(nodestru Nodestructure, wg *sync.WaitGr
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveFileRequestFromCenter", err)
+			return
 		}
 		err = receiveFileRequestFormCenter(nodestru, msg.Value)
 		if err != nil {
@@ -194,6 +203,7 @@ func consumeGroupChoose(nodestru Nodestructure, wg *sync.WaitGroup) {
 		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "GroupChoose", err)
+			return
 		}
 		err = chooseGroup(nodestru, msg.Value)
 		if err != nil {

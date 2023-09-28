@@ -93,7 +93,7 @@ type KeyUploadInfo struct {
 }
 
 type NodeInfo struct {
-	NodeIp      string
+	NodeAddr    string
 	LeftStorage string
 	locationX   string
 	locationY   string

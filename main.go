@@ -2,7 +2,6 @@ package main
 
 import (
 	"fabric-edgenode/NodeUtils"
-	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,17 @@ func main() {
 		CenterAddr:   os.Getenv("CENTER_ADDR"),
 		ConfigPath:   "/conf/config.yaml",
 	}
-	
+
+	// var node = NodeUtils.Nodestructure{
+	// 	KafkaIp:      "0.0.0.0:9092",
+	// 	Couchdb_addr: "http://admin:123456@couchdb0:5984",
+	// 	PeerNodeName: "peer0.org1.example.com:7051",
+	// 	OrgID:        "1",
+	// 	KeyPath:      "./fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk",
+	// 	CenterAddr:   "0.0.0.0:9091",
+	// 	ConfigPath:   "./cfg/org1conf.yaml",
+	// }
+
 	//init node
 	node.InitPeerNode(peertopics)
 	//start websocket
@@ -33,5 +42,4 @@ func main() {
 	r.POST("/upload", NodeUtils.Upload)           //http://10.0.0.144:8083/upload
 	r.POST("/requestfile", NodeUtils.Filerequest) //http://10.0.0.144:8083/requestfile
 	r.Run("0.0.0.0:8083")                         // 0.0.0.0:8083
-	fmt.Println("start")
 }

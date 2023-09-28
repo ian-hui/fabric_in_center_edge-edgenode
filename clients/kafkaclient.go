@@ -40,6 +40,5 @@ func InitConsumer(kafka_addr string, topic string) *kafka.Reader {
 
 	// 创建Kafka Reader对象
 	reader := kafka.NewReader(config)
-
 	return reader
 }

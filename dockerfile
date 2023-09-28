@@ -1,4 +1,5 @@
-FROM golang:alpine AS builder
+#切记golang版本不能太高，会报错
+FROM golang:1.18-alpine AS builder
 
 ENV GO111MODULE=on \
     GOPROXY=https://goproxy.cn,direct \

@@ -1,74 +1,70 @@
 version: '3'
 networks:
-  kafka-test:
-    # external: true
-    name: kafka-test
+  fixtures_test:
+    external: true
+    name: fixtures_test
 
 services:
 
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - kafka-test
-
-  zoonavigator:
-    image: elkozmon/zoonavigator:latest
-    ports:
-      - 2182:2182
-    environment:
-      ZOO_HOSTS: 'zookeeper:2181'
-      HTTP_PORT: 2182
-    links:
-      - zookeeper
-    networks:
-      - kafka-test
-
-  kafka1:
-    image: wurstmeister/kafka:latest
-    container_name: kafka
-    ports:
-      - 9092:9092
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 0
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - kafka-test
-
-  # edgenode-peer0-org1:
-  #   image: fabric-edgenode:latest
-  #   ports:
-  #     - "7080:8080"
-  #     - "7083:8083"
-  #   volumes:
-  #     - ./cfg/org1conf.yaml:/conf/config.yaml
-  #     - ./fixtures/channel-artifacts:/fixtures/channel-artifacts
-  #     - ./fixtures/crypto-config:/fixtures/crypto-config
-  #     - ./kafka_crypto:/kafka_crypto
+  # zookeeper:
+  #   image: wurstmeister/zookeeper:latest
+  #   container_name: zookeeper
   #   environment:
-  #     - KAFKA_IP="kafka:9092"
-  #     - COUDB_ADDR="http://admin:123456@couchdb0:5984"
-  #     - PEER_NODE_NAME="peer0.org1.example.com:7051"
-  #     - ORG_ID = "org1"
-  #     - KEY_PATH = "/fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk"
-  #     - CENTER_ADDR = "center_kafka:9091"
-  #   depends_on:
-  #     - kafka.peer0.org1.example.com
-  #     - couchdb0
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   ports:
+  #     - "2181:2181"
   #   networks:
-  #     - kafka-test
+  #     - fixtures_test
+
+  # zoonavigator:
+  #   image: elkozmon/zoonavigator:latest
+  #   ports:
+  #     - 2182:2182
+  #   environment:
+  #     ZOO_HOSTS: 'zookeeper:2181'
+  #     HTTP_PORT: 2182
+  #   links:
+  #     - zookeeper
+  #   networks:
+  #     - fixtures_test
+
+  # kafka1:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka
+  #   ports:
+  #     - 9092:9092
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 0
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
+
+  edgenode-peer0-org1:
+    image: fabric-edgenode:latest
+    ports:
+      - "7080:8080"
+      - "7083:8083"
+    volumes:
+      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./fixtures:/fixtures
+      - ./kafka_crypto:/kafka_crypto
+    environment:
+      - KAFKA_IP=kafka:9092
+      - COUCHDB_ADDR=http://admin:123456@couchdb0:5984
+      - PEER_NODE_NAME=peer0.org1.example.com:7051
+      - ORG_ID=1
+      - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk
+      - CENTER_ADDR=center_kafka:9091
+    networks:
+      - fixtures_test

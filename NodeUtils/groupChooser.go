@@ -5,14 +5,18 @@ import (
 	"fabric-edgenode/clients"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"strconv"
 )
 
 type groupChooser struct {
 	// TODO
-	weight   float64
-	Nodestru Nodestructure
+	storage_weight            float64
+	distance_weight           float64
+	standard_deviation_weight float64
+	// Nodestru Nodestructure
+	curNodeInfo *NodeInfo
 }
 
 type processed_nodeinfo struct {
@@ -27,28 +31,31 @@ type kv struct {
 	Value float64
 }
 
-// func Constructor
+func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd float64, err error) {
+	var (
+		nodelist              []NodeInfo
+		candidate_nodeinfoMap = make(map[string]*processed_nodeinfo)
+		mindist, maxdist      = math.MaxFloat64, 0.0
+		minstor, maxstor      = math.MaxInt64, 0
+		//创建一个group
+	)
+	Cur_group = make([]string, 0)
 
-func (g *groupChooser) chooseGroup(k int) (group []string, err error) {
 	//获取所有节点的距离以及剩余空间信息
-	var v []NodeInfo
-	nodeinfoMap := make(map[string]*processed_nodeinfo)
-	res, err := clients.GetPeerFabric(g.Nodestru.PeerNodeName, "node").GetNodeInfoAllRange(g.Nodestru.PeerNodeName)
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodeAddr, "node").GetNodeInfoAllRange(g.curNodeInfo.NodeAddr)
 	if err != nil {
-		return
+		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
-	if json.Unmarshal(res, &v) != nil {
-		return
+
+	//nodelist_byte 转化为 nodelist
+	if err := json.Unmarshal(nodelist_byte, &nodelist); err != nil {
+		return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
 	}
-	mindist, maxdist := math.MaxFloat64, 0.0
-	minstor, maxstor := math.MaxInt64, 0
+
 	//计算本节点到其他节点的距离,顺便找出dist和storage的最大最小值
-	for _, nodeif := range v {
-		//找出本节点,不计算
-		if nodeif.NodeIp == g.Nodestru.KafkaIp {
-			continue
-		}
-		dist := euclideanDistance(g.Nodestru.NodeInfo, &nodeif)
+	for _, nodeif := range nodelist {
+
+		dist := euclideanDistance(g.curNodeInfo, &nodeif)
 		//判断是否是最大最小值
 		if dist < mindist {
 			mindist = dist
@@ -56,10 +63,14 @@ func (g *groupChooser) chooseGroup(k int) (group []string, err error) {
 		if dist > maxdist {
 			maxdist = dist
 		}
-		//判断storage的最大最小值
+		//判断sorage的最大最小值
 		nodeStorage, err := strconv.Atoi(nodeif.LeftStorage)
 		if err != nil {
-			return group, err
+			return nil, 0, 0, fmt.Errorf("strconv.Atoi error: %v", err)
+		}
+		//如果剩下的空间为0,则不计算
+		if nodeStorage == 0 {
+			continue
 		}
 		if nodeStorage < minstor {
 			minstor = nodeStorage
@@ -67,24 +78,41 @@ func (g *groupChooser) chooseGroup(k int) (group []string, err error) {
 		if nodeStorage > maxstor {
 			maxstor = nodeStorage
 		}
-		nodeinfoMap[nodeif.NodeIp] = &processed_nodeinfo{
+		//候选节点
+		candidate_nodeinfoMap[nodeif.NodeAddr] = &processed_nodeinfo{
 			distance: dist,
 			storage:  nodeStorage,
 		}
 	}
+	//计算标准差
+	sd = g.getStandardDeviation(nodelist)
 	//归一化并计算得分
-	for _, nodeif := range v {
-		if nodeif.NodeIp == g.Nodestru.KafkaIp {
-			continue
-		}
-		dist, stor := normalized(nodeinfoMap[nodeif.NodeIp].distance, float64(nodeinfoMap[nodeif.NodeIp].storage), mindist, maxdist, minstor, maxstor)
-		nodeinfoMap[nodeif.NodeIp].score = g.weight*dist + (1-g.weight)*stor
+	for _, nodeif := range candidate_nodeinfoMap {
+		dist, stor := normalized(nodeif.distance, float64(nodeif.storage), mindist, maxdist, minstor, maxstor)
+		nodeif.score = g.getScore(dist, stor, sd)
 	}
 	//排序
-	sortedMap := sortMap(nodeinfoMap)
-	for i := 0; i < k; i++ {
-		group = append(group, sortedMap[i].Key)
+	sortedMap := sortMap(candidate_nodeinfoMap)
+
+	//如果k大于候选节点的数量,则返回错误(无法服务)
+	if len(sortedMap) < k {
+		return nil, 0, 0, fmt.Errorf("can not find enough node to form a group")
 	}
+
+	for i := 0; i < k; i++ {
+		Cur_group = append(Cur_group, sortedMap[i].Key)
+		//选择这些节点
+		delay += candidate_nodeinfoMap[sortedMap[i].Key].distance * 100
+		//减少这些节点的剩余空间
+		num, err := strconv.Atoi(sortedMap[i].Key)
+		if err != nil {
+			panic(err)
+		}
+		nodelist[num-1].LeftStorage = strconv.Itoa(candidate_nodeinfoMap[sortedMap[i].Key].storage - 1)
+	}
+
+	//平均延迟
+	delay /= float64(k)
 	return
 }
 
@@ -127,4 +155,94 @@ func sortMap(m map[string]*processed_nodeinfo) []kv {
 		return ss[i].Value > ss[j].Value
 	})
 	return ss
+}
+
+func (g *groupChooser) getStandardDeviation(nodelist []NodeInfo) float64 {
+
+	sum := 0
+	for _, nodeif := range nodelist {
+		storage, err := strconv.Atoi(nodeif.LeftStorage)
+		if err != nil {
+			panic(err)
+		}
+		sum += storage
+	}
+	average := float64(sum) / float64(len(nodelist))
+
+	//计算标准差
+	var sd float64
+	for _, nodeif := range nodelist {
+		storage, err := strconv.Atoi(nodeif.LeftStorage)
+		if err != nil {
+			panic(err)
+		}
+		sd += math.Pow(float64(storage)-average, 2)
+	}
+
+	return sd
+}
+
+func (g *groupChooser) getScore(dist float64, storage float64, sd float64) float64 {
+	return g.distance_weight*dist + g.storage_weight*storage + g.standard_deviation_weight*sd
+}
+
+func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, sd float64, err error) {
+	var nodelist []NodeInfo
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodeAddr, "node").GetNodeInfoAllRange(g.curNodeInfo.NodeAddr)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
+	}
+	if err := json.Unmarshal(nodelist_byte, &nodelist); err != nil {
+		return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
+	}
+	//获取所有节点的距离以及剩余空间信息
+	candidate_nodeinfoMap := make(map[string]*processed_nodeinfo)
+	//计算本节点到其他节点的距离,顺便找出dist和storage的最大最小值
+	for _, nodeif := range nodelist {
+		//判断sorage的最大最小值
+		nodeStorage, err := strconv.Atoi(nodeif.LeftStorage)
+		if err != nil {
+			panic(err)
+		}
+		//如果剩下的空间为0,则不计算
+		if nodeStorage == 0 {
+			continue
+		}
+		//如果本节点的剩余空间不为0
+		// if g.curNodeInfo.LeftStorage != "0" {
+		//候选节点距离以本节点为中心
+		candidate_nodeinfoMap[nodeif.NodeAddr] = &processed_nodeinfo{
+			storage:  nodeStorage,
+			distance: euclideanDistance(g.curNodeInfo, &nodeif),
+		}
+		// }
+		//  else {
+		// 	//候选节点距离以
+
+	}
+	if len(candidate_nodeinfoMap) < k {
+		return nil, 0, 0, fmt.Errorf("can not find enough node to form a group")
+	}
+	//计算标准差
+	sd = g.getStandardDeviation(nodelist)
+	//在candidate中随机挑选k个
+	all_candidate := make([]string, 0)
+	for k := range candidate_nodeinfoMap {
+		all_candidate = append(all_candidate, k)
+	}
+	for i := 0; i < k; i++ {
+		//随机选择一个节点
+		rand_nodeid := rand.Intn(len(all_candidate))
+		//选择这些节点
+		delay += candidate_nodeinfoMap[all_candidate[rand_nodeid]].distance * 100
+		//减少这些节点的剩余空间
+		num, err := strconv.Atoi(all_candidate[rand_nodeid])
+		if err != nil {
+			panic(err)
+		}
+		nodelist[num-1].LeftStorage = strconv.Itoa(candidate_nodeinfoMap[all_candidate[rand_nodeid]].storage - 1)
+		//取出这个节点
+		all_candidate = append(all_candidate[:rand_nodeid], all_candidate[rand_nodeid+1:]...)
+	}
+	return
 }

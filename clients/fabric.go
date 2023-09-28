@@ -23,7 +23,7 @@ type App struct {
 	app         *sdkInit.Application
 }
 
-func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *sdkInit.SdkEnvInfo, app **App) error {
+func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *sdkInit.SdkEnvInfo, app *App) error {
 	orgnum, err := strconv.Atoi(orgID)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *s
 	if err := channel_info.InitService(channel_info.ChaincodeID, channel_info.ChannelID, channel_info.Orgs[orgnum-1], sdk); err != nil {
 		panic(fmt.Sprintf(">>channel %s InitService unsuccessful: %v", path, err))
 	}
-	*app = &App{
+	*app = App{
 		channelInfo: channel_info,
 		app:         &sdkInit.Application{SdkEnvInfo: channel_info},
 	}
@@ -48,10 +48,12 @@ func InitPeerSdk(PeerNodeAddr string, orgID string, path string) error {
 		accessApp,
 		nodeApp,
 	}
-	for _, app := range apps {
-		if err := Constructor(PeerNodeAddr, orgID, path, app.channelInfo, &app); err != nil {
+	for i := range apps {
+		fmt.Println(">>channel", PeerNodeAddr, "InitPeerSdk begin")
+		if err := Constructor(PeerNodeAddr, orgID, path, apps[i].channelInfo, apps[i]); err != nil {
 			return err
 		}
+		fmt.Println(">>channel", PeerNodeAddr, "InitPeerSdk successful")
 	}
 	return nil
 }
@@ -59,7 +61,9 @@ func InitPeerSdk(PeerNodeAddr string, orgID string, path string) error {
 func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
 	switch app_type {
 	case "user":
-		return userApp.app
+		fmt.Println(userApp)
+		a := userApp.app
+		return a
 	case "access":
 		return accessApp.app
 	case "node":

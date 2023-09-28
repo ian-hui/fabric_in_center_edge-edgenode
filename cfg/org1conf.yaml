@@ -15,15 +15,15 @@ client:
     level: info
 
   cryptoconfig:
-    path: /home/go/src/fabric-go-sdk/fixtures/crypto-config
+    path: /fixtures/crypto-config
 
   credentialStore:
 
-    path: "/tmp/state-store"
+    # path: "/tmp/state-store"
 
-    cryptoStore:
-      # Specific to the underlying KeyValueStore that backs the crypto key store.
-      path: /tmp/msp
+    # cryptoStore:
+    #   # Specific to the underlying KeyValueStore that backs the crypto key store.
+    #   path: /tmp/msp
 
   BCCSP:
     security:
@@ -41,24 +41,16 @@ client:
     # [Optional]. Client key and cert for TLS handshake with peers and orderers
     client:
       key:
-        path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/tls/client.key
+        path: /fixtures/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/tls/client.key
       cert:
-        path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/tls/client.crt
+        path: /fixtures/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/tls/client.crt
 
 #关于channel的配置
 channels:
 
-
-
   # multi-org test channel
-  userinfoChannel:
+  myuserinfochannel:
     #this part set the configration of peer.endorsingpeer decide if this peer participate in endorsing
-    orderers:
-      - orderer.example.com
-      - orderer2.example.com
-      - orderer3.example.com
-      - orderer4.example.com
-
     peers:
       peer0.org1.example.com:
         endorsingPeer: true
@@ -66,85 +58,12 @@ channels:
         ledgerQuery: true
         eventSource: true
 
-
-      peer1.org1.example.com:
-        endorsingPeer: true
-        chaincodeQuery: false
-        ledgerQuery: true
-        eventSource: false
-
-      
-      peer0.org2.example.com:
-        endorsingPeer: true
-        chaincodeQuery: false
-        ledgerQuery: true
-        eventSource: false
-
-      peer1.org2.example.com:
-        endorsingPeer: true
-        chaincodeQuery: false
-        ledgerQuery: true
-        eventSource: false
-      
-      peer0.org3.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-
-
-      peer1.org3.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-
-      
-      peer0.org4.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-
-      peer1.org4.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-
-    policies:
-      queryChannelConfig:
-        minResponses: 1
-        maxTargets: 1
-        retryOpts:
-          attempts: 5
-          initialBackoff: 500ms
-          maxBackoff: 5s
-          backoffFactor: 2.0
-
-  accessChannel:
-    #this part set the configration of peer.endorsingpeer decide if this peer participate in endorsing
-    orderers:
-      - orderer.example.com
-      - orderer2.example.com
-      - orderer3.example.com
-      - orderer4.example.com
-      
-    peers:
-      peer0.org1.example.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-
-
       peer1.org1.example.com:
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
 
-      
       peer0.org2.example.com:
         endorsingPeer: true
         chaincodeQuery: true
@@ -192,14 +111,9 @@ channels:
           initialBackoff: 500ms
           maxBackoff: 5s
           backoffFactor: 2.0
-          
-  nodeinfoChannel:
+
+  myaccesschannel:
     #this part set the configration of peer.endorsingpeer decide if this peer participate in endorsing
-    orderers:
-      - orderer.example.com
-      - orderer2.example.com
-      - orderer3.example.com
-      - orderer4.example.com
     peers:
       peer0.org1.example.com:
         endorsingPeer: true
@@ -207,6 +121,68 @@ channels:
         ledgerQuery: true
         eventSource: true
 
+      peer1.org1.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer0.org2.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.org2.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      
+      peer0.org3.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+
+      peer1.org3.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      
+      peer0.org4.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      peer1.org4.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    policies:
+      queryChannelConfig:
+        minResponses: 1
+        maxTargets: 1
+        retryOpts:
+          attempts: 5
+          initialBackoff: 500ms
+          maxBackoff: 5s
+          backoffFactor: 2.0
+
+  mynodeinfochannel:
+    #this part set the configration of peer.endorsingpeer decide if this peer participate in endorsing
+    peers:
+      peer0.org1.example.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
 
       peer1.org1.example.com:
         endorsingPeer: true
@@ -214,7 +190,6 @@ channels:
         ledgerQuery: true
         eventSource: true
 
-      
       peer0.org2.example.com:
         endorsingPeer: true
         chaincodeQuery: true
@@ -277,6 +252,8 @@ organizations:
     peers:
       - peer0.org1.example.com
       - peer1.org1.example.com
+    # certificateAuthorities:
+    #   - ca.org1.example.com
 
   org2:
     mspid: Org2MSP
@@ -287,6 +264,8 @@ organizations:
     peers:
       - peer0.org2.example.com
       - peer1.org2.example.com 
+    # certificateAuthorities:
+    #   - ca.org2.example.com
 
   org3:
     mspid: Org3MSP
@@ -297,6 +276,8 @@ organizations:
     peers:
       - peer0.org3.example.com
       - peer1.org3.example.com
+    # certificateAuthorities:
+    #   - ca.org3.example.com
 
   org4:
     mspid: Org4MSP
@@ -307,6 +288,8 @@ organizations:
     peers:
       - peer0.org4.example.com
       - peer1.org4.example.com 
+    # certificateAuthorities:
+    #   - ca.org4.example.com
 
 
 
@@ -373,73 +356,8 @@ orderers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+      path: /fixtures/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 
-  orderer2.example.com:
-    # [Optional] Default: Infer from hostname
-    url: orderer2.example.com:8050
-
-    # these are standard properties defined by the gRPC library
-    # they will be passed in as-is to gRPC client constructor
-    grpcOptions:
-      ssl-target-name-override: orderer2.example.com
-      # These parameters should be set in coordination with the keepalive policy on the server,
-      # as incompatible settings can result in closing of connection.
-      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
-      keep-alive-time: 0s
-      keep-alive-timeout: 20s
-      keep-alive-permit: false
-      fail-fast: false
-      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
-      allow-insecure: false
-
-    tlsCACerts:
-      # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-
-  orderer3.example.com:
-    # [Optional] Default: Infer from hostname
-    url: orderer3.example.com:9050
-
-    # these are standard properties defined by the gRPC library
-    # they will be passed in as-is to gRPC client constructor
-    grpcOptions:
-      ssl-target-name-override: orderer3.example.com
-      # These parameters should be set in coordination with the keepalive policy on the server,
-      # as incompatible settings can result in closing of connection.
-      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
-      keep-alive-time: 0s
-      keep-alive-timeout: 20s
-      keep-alive-permit: false
-      fail-fast: false
-      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
-      allow-insecure: false
-
-    tlsCACerts:
-      # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-
-  orderer4.example.com:
-    # [Optional] Default: Infer from hostname
-    url: orderer4.example.com:10050
-
-    # these are standard properties defined by the gRPC library
-    # they will be passed in as-is to gRPC client constructor
-    grpcOptions:
-      ssl-target-name-override: orderer4.example.com
-      # These parameters should be set in coordination with the keepalive policy on the server,
-      # as incompatible settings can result in closing of connection.
-      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
-      keep-alive-time: 0s
-      keep-alive-timeout: 20s
-      keep-alive-permit: false
-      fail-fast: false
-      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
-      allow-insecure: false
-
-    tlsCACerts:
-      # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 peers:
 
 
@@ -463,7 +381,7 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
 
   peer1.org1.example.com:
     url: peer1.org1.example.com:8051
@@ -481,7 +399,7 @@ peers:
       # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
       allow-insecure: false
     tlsCACerts:
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
 
   peer0.org2.example.com:
     # this URL is used to send endorsement and query requests
@@ -503,7 +421,7 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+      path:  /fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
 
 
   peer1.org2.example.com:
@@ -522,7 +440,7 @@ peers:
       # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
       allow-insecure: false
     tlsCACerts:
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
 
   peer0.org3.example.com:
     # this URL is used to send endorsement and query requests
@@ -544,7 +462,7 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
 
   peer1.org3.example.com:
     url: peer1.org3.example.com:12051
@@ -562,7 +480,7 @@ peers:
       # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
       allow-insecure: false
     tlsCACerts:
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
 
   peer0.org4.example.com:
     # this URL is used to send endorsement and query requests
@@ -584,7 +502,7 @@ peers:
 
     tlsCACerts:
       # Certificate location absolute path
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
 
 
   peer1.org4.example.com:
@@ -603,10 +521,99 @@ peers:
       # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
       allow-insecure: false
     tlsCACerts:
-      path: /home/go/src/fabric-go-sdk/fixtures/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
+      path: /fixtures/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
 
+# certificateAuthorities:
+#   ca.org1.example.com:
+#     # [Optional] Default: Infer from hostname
+#     url: https://ca.org1.example.com:7054
+#     # [Optional] The optional server name for target override
+#     #grpcOptions:
+#     #  ssl-target-name-override: ca.org1.example.com
+#     tlsCACerts:
+#       # Comma-Separated list of paths
+#       path: /fixtures/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+#       # Client key and cert for SSL handshake with Fabric CA
+#       client:
+#         key:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.key
+#     registrar:
+#       enrollId: admin
+#       enrollSecret: adminpw
+#     # [Optional] The optional name of the CA.
+#     caName: ca.org1.example.com
+  
+#   ca.org2.example.com:
+#     url: https://ca.org2.example.com:8054
+#     # [Optional] The optional server name for target override
+#     #grpcOptions:
+#     #  ssl-target-name-override: ca.org2.example.com
+#     tlsCACerts:
+#       # Comma-Separated list of paths
+#       path: /fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+#       # Client key and cert for SSL handshake with Fabric CA
+#       client:
+#         key:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.key
+#         cert:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.crt
 
-#
+#      # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+#      # needed to enroll and invoke new users.
+#      # Fabric-CA支持通过REST api动态注册用户。注册和调用新用户需要一个“根”用户，即注册商。
+#     registrar:
+#       enrollId: admin
+#       enrollSecret: adminpw
+#     # [Optional] The optional name of the CA.
+#     caName: ca.org2.example.com
+
+#   ca.org3.example.com:
+#     url: https://ca.org3.example.com:9054
+#     # [Optional] The optional server name for target override
+#     #grpcOptions:
+#     #  ssl-target-name-override: ca.org3.example.com
+#     tlsCACerts:
+#       # Comma-Separated list of paths
+#       path: /fixtures/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
+#       # Client key and cert for SSL handshake with Fabric CA
+#       client:
+#         key:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.key
+#         cert:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.crt
+
+#      # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+#      # needed to enroll and invoke new users.
+#      # Fabric-CA支持通过REST api动态注册用户。注册和调用新用户需要一个“根”用户，即注册商。
+#     registrar:
+#       enrollId: admin
+#       enrollSecret: adminpw
+#     # [Optional] The optional name of the CA.
+#     caName: ca.org3.example.com
+
+#   ca.org4.example.com:
+#     url: https://ca.org4.example.com:10054
+#     # [Optional] The optional server name for target override
+#     #grpcOptions:
+#     #  ssl-target-name-override: ca.org2.example.com
+#     tlsCACerts:
+#       # Comma-Separated list of paths
+#       path: /fixtures/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+#       # Client key and cert for SSL handshake with Fabric CA
+#       client:
+#         key:
+#           path: /fixtures/crypto-config/peerOrganizations/org.example.com/users/User1@tls.example.com/tls/client.key
+#         cert:
+#           path: /fixtures/crypto-config/peerOrganizations/tls.example.com/users/User1@tls.example.com/tls/client.crt
+
+#      # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+#      # needed to enroll and invoke new users.
+#      # Fabric-CA支持通过REST api动态注册用户。注册和调用新用户需要一个“根”用户，即注册商。
+#     registrar:
+#       enrollId: admin
+#       enrollSecret: adminpw
+#     # [Optional] The optional name of the CA.
+#     caName: ca.org2.example.com
 # Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
 # certificate management to be done via REST APIs. Application may choose to use a standard
 # Certificate Authority instead of Fabric-CA, in which case this section would not be specified.
@@ -632,3 +639,24 @@ entityMatchers:
       urlSubstitutionExp: ${1}.org4.example.com:${2}
       sslTargetOverrideUrlSubstitutionExp: ${1}.org4.example.com
       mappedHost: peer0.org4.example.com
+
+  # certificateAuthority:
+  #   - pattern: (\w+).org1.example.(\w+)
+  #     urlSubstitutionExp:
+  #     sslTargetOverrideUrlSubstitutionExp: ca.example.com
+  #     mappedHost: ca.org1.example.com
+
+  #   - pattern: (\w+).org2.example.(\w+)
+  #     urlSubstitutionExp:
+  #     sslTargetOverrideUrlSubstitutionExp: ca.example.com
+  #     mappedHost: ca.org2.example.com
+
+  #   - pattern: (\w+).org3.example.(\w+)
+  #     urlSubstitutionExp:
+  #     sslTargetOverrideUrlSubstitutionExp: ca.example.com
+  #     mappedHost: ca.org3.example.com
+
+  #   - pattern: (\w+).org3.example.(\w+)
+  #     urlSubstitutionExp:
+  #     sslTargetOverrideUrlSubstitutionExp: ca.example.com
+  #     mappedHost: ca.org3.example.com

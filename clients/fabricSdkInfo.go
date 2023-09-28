@@ -10,7 +10,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_userinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org1MSPanchors_userinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -18,7 +18,7 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_userinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org2MSPanchors_userinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -26,7 +26,7 @@ var (
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_userinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org3MSPanchors_userinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -34,7 +34,7 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_userinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org4MSPanchors_userinfoChannel.tx",
 		},
 	}
 
@@ -45,7 +45,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_accessChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org1MSPanchors_accessChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -53,14 +53,14 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_accessChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org2MSPanchors_accessChannel.tx",
 		}, {
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_accessChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org3MSPanchors_accessChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -68,7 +68,7 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_accessChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org4MSPanchors_accessChannel.tx",
 		},
 	}
 
@@ -79,7 +79,7 @@ var (
 			OrgMspId:      "Org1MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org1MSPanchors_nodeinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org1MSPanchors_nodeinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -87,14 +87,14 @@ var (
 			OrgMspId:      "Org2MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org2MSPanchors_nodeinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org2MSPanchors_nodeinfoChannel.tx",
 		}, {
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org3MSPanchors_nodeinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org3MSPanchors_nodeinfoChannel.tx",
 		},
 		{
 			OrgAdminUser:  "Admin",
@@ -102,14 +102,14 @@ var (
 			OrgMspId:      "Org4MSP",
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
-			OrgAnchorFile: "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/Org4MSPanchors_nodeinfoChannel.tx",
+			OrgAnchorFile: "/fixtures/channel-artifacts/Org4MSPanchors_nodeinfoChannel.tx",
 		},
 	}
 
 	//init sdk env info
 	UserinfoChannel_info = sdkInit.SdkEnvInfo{
 		ChannelID:        "myuserinfochannel",
-		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/userinfoChannel.tx",
+		ChannelConfig:    "/fixtures/channel-artifacts/userinfoChannel.tx",
 		Orgs:             Orgs_userinfoChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
@@ -120,7 +120,7 @@ var (
 	}
 	AccessChannel_info = sdkInit.SdkEnvInfo{
 		ChannelID:        "myaccesschannel",
-		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/accessChannel.tx",
+		ChannelConfig:    "/fixtures/channel-artifacts/accessChannel.tx",
 		Orgs:             Orgs_accessChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
@@ -131,7 +131,7 @@ var (
 	}
 	NodeinfoChannel_info = sdkInit.SdkEnvInfo{
 		ChannelID:        "mynodeinfochannel",
-		ChannelConfig:    "/home/go/src/fabric_in_edge-cloud_fabric-master/fixtures/channel-artifacts/nodeinfoChannel.tx",
+		ChannelConfig:    "/fixtures/channel-artifacts/nodeinfoChannel.tx",
 		Orgs:             Orgs_nodeinfoChannel,
 		OrdererAdminUser: "Admin",
 		OrdererOrgName:   "OrdererOrg",
