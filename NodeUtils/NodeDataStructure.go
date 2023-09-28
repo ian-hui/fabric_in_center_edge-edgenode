@@ -19,9 +19,9 @@ type Nodestructure struct {
 
 type PositionInfo struct {
 	// AreaId   string `json:"AreaId"`
-	FileId   string   `json:"FileId"`
-	Position string   `json:"Position"`
-	GroupIps []string `json:"GroupIps"`
+	FileId     string   `json:"FileId"`
+	Position   string   `json:"Position"`
+	GroupAddrs []string `json:"GroupIps"`
 }
 
 type FileInfo struct {

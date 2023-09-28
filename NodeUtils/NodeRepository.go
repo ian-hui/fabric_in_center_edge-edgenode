@@ -10,145 +10,10 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/fatih/structs"
-	_ "github.com/go-kivik/couchdb/v4"   // The CouchDB driver
-	kivik "github.com/go-kivik/kivik/v4" //couchdb-go第三方库
+	_ "github.com/go-kivik/couchdb/v4" // The CouchDB driver
+	kivik "github.com/go-kivik/kivik/v4"
 	"github.com/segmentio/kafka-go"
 )
-
-func (nodestru Nodestructure) Create_ciphertext_info() error { //create db in couchdb
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	err = client.C.CreateDB(context.TODO(), "ciphertext_info", nil)
-	if err != nil {
-		return fmt.Errorf("create ciphertext_info db error: %v", err)
-	}
-	fmt.Println("<-------", nodestru.Couchdb_addr, " couchdb ciphertext_info created!------>")
-	return nil
-}
-
-func (nodestru Nodestructure) Create_cipherkey_info() error { //create db in couchdb
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-
-	err = client.C.CreateDB(context.TODO(), "cipherkey_info", nil)
-	if err != nil {
-		return fmt.Errorf("create ciphertext_info db error: %v", err)
-	}
-	fmt.Println("<-------", nodestru.Couchdb_addr, " couchdb cipherkey_info created!------>")
-	return nil
-}
-
-func Create_position_info(nodestru Nodestructure) error { //create db in couchdb
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	err = client.C.CreateDB(context.TODO(), "position_info", nil)
-	if err != nil {
-		return fmt.Errorf("create ciphertext_info db error: %v", err)
-	}
-	fmt.Println("<-------", nodestru.Couchdb_addr, " couchdb position_info created!------>")
-	return nil
-}
-
-// UploadOrUpdatePostion as the name means
-func UploadPostion(f PositionInfo, nodestru Nodestructure) error {
-	json_fileposif := structs.Map(&f) //转格式，详细看https://github.com/go-kivik/kivik
-	//连接couchdb
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	client.Mu.Lock()
-	defer client.Mu.Unlock()
-	db := client.C.DB("position_info", nil)                   //连接couchdb中的positon_info数据库
-	_, err = db.Put(context.TODO(), f.FileId, json_fileposif) //把数据info上传到db
-	if err != nil {
-		panic(err)
-	}
-	return nil
-}
-
-func UpdatePostion(fileid string, nodestru Nodestructure, targetdata []string, changedata []string) error {
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	// client.Mu.Lock()
-	// defer client.Mu.Unlock()
-	db := client.C.DB("position_info", nil) //connect to position_info
-	resultSet := db.Get(context.TODO(), fileid)
-
-	var doc map[string]interface{}
-	err = resultSet.ScanDoc(&doc)
-	if err != nil {
-		return fmt.Errorf("scandoc error: ", err)
-	}
-	for i := range targetdata {
-		//modify the position in center
-		doc[targetdata[i]] = changedata[i]
-	}
-	_, err = db.Put(context.TODO(), fileid, doc) //把数据info上传到db
-	if err != nil {
-		UpdatePostion(fileid, nodestru, targetdata, changedata)
-	}
-	return nil
-}
-
-func UploadOrUpdateCipherText(f FileInfo, nodestru Nodestructure) error {
-	json_fileposif := structs.Map(&f) //转格式，详细看https://github.com/go-kivik/kivik
-	//连接couchdb
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	client.Mu.Lock()
-	defer client.Mu.Unlock()
-	db := client.C.DB("ciphertext_info", nil)                    //连接couchdb中的cipher_info数据库
-	rev, err := db.Put(context.TODO(), f.FileId, json_fileposif) //把数据info上传到db
-	if err != nil {
-		// if kivik.StatusCode(err) == 409
-		UploadOrUpdateCipherText(f, nodestru)
-	}
-	fmt.Printf("%s inserted with revision %s\n", f.FileId, rev)
-	return nil
-}
-
-func Getinfo(fileid string, nodestru Nodestructure, dbname string) (kivik.ResultSet, error) {
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return nil, fmt.Errorf("get couchdb client error: %v", err)
-	}
-	db := client.C.DB(dbname, nil) //connect to position_info
-	resultSet := db.Get(context.TODO(), fileid)
-	if resultSet.Err() != nil {
-		return nil, resultSet.Err()
-	}
-	return resultSet, nil
-
-}
-
-func UploadCipherKey(f KeyDetailInfo, nodestru Nodestructure) error {
-	json_fileposif := structs.Map(&f) //转格式，详细看https://github.com/go-kivik/kivik
-	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
-	if err != nil {
-		return fmt.Errorf("get couchdb client error: %v", err)
-	}
-	client.Mu.Lock()
-	defer client.Mu.Unlock()
-	db := client.C.DB("cipherkey_info", nil)                  //connect to ciphertext_info
-	_, err = db.Put(context.TODO(), f.FileId, json_fileposif) //把数据info上传到db
-	if err != nil {
-		return fmt.Errorf("upload cipherkey error: %v", err)
-	}
-	// fmt.Printf("%s inserted with revision %s\n", f.FileId, rev)
-	return nil
-}
 
 func GetAreaKafkaAddrInZookeeper(area_num string) []string {
 	var res map[string]interface{}
@@ -215,17 +80,6 @@ func GetAllPeerAddrInZookeeper() []string {
 	return kafka_addr
 }
 
-func CheckNotExistence(f string, nodestru Nodestructure, dbname string) bool {
-	_, err := Getinfo(f, nodestru, dbname)
-	if err != nil {
-		if kivik.StatusCode(err) == 404 {
-			return true
-		}
-		fmt.Println("check file existence getinfo error ", err)
-	}
-	return false
-}
-
 func ProducerAsyncSending(messages []byte, topic string, kafka_addr string) error {
 	kafka_client := clients.GetProducer(kafka_addr)
 	err := kafka_client.WriteMessages(context.Background(), kafka.Message{
@@ -288,4 +142,54 @@ func NewTLSConfig() (*tls.Config, error) {
 		Certificates: []tls.Certificate{cert},
 	}
 	return tlsConfig, err
+}
+
+// Functions that transfer data at regular intervals
+func CipherPosTransfer(FileId string, nodestru Nodestructure, addr string) error {
+	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
+	if err != nil {
+		return fmt.Errorf("get couchdb client error: %v", err)
+	}
+	client.Mu.Lock()
+	defer client.Mu.Unlock()
+	db := client.C.DB("ciphertext_info", nil) //connect to position_info
+	resultSet := db.Get(context.TODO(), FileId)
+	//deal with error
+	if resultSet.Err() != nil {
+		//not found
+		if kivik.StatusCode(resultSet.Err()) == 404 {
+			fmt.Println("<------file ", FileId, " Not found in this node------>")
+		} else {
+			fmt.Println("db.get error:", resultSet.Err())
+		}
+		return resultSet.Err()
+	}
+	//get ciphertext info
+	var fileinfotempdto FileRequestDTO
+	err = resultSet.ScanDoc(&fileinfotempdto)
+	if err != nil {
+		fmt.Println("scandoc error: ", err)
+		return err
+	}
+	//ciphertext info
+	fileinfostru := FileInfo{
+		FileId:     fileinfotempdto.FileId,
+		Ciphertext: fileinfotempdto.Ciphertext,
+	}
+	res, err := json.Marshal(fileinfostru)
+	if err != nil {
+		return fmt.Errorf("json marshal error: %v", err)
+	}
+	topic := "UploadCiText" //操作名
+	err = ProducerAsyncSending(res, topic, addr)
+	if err != nil {
+		return fmt.Errorf("ProducerAsyncSending error: %v", err)
+	}
+
+	//delete local ciphertext
+	_, err = db.Delete(context.TODO(), FileId, resultSet.Rev())
+	if err != nil {
+		return fmt.Errorf("delete local ciphertext error: %v", err)
+	}
+	return nil
 }

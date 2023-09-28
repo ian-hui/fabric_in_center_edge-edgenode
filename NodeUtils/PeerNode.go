@@ -33,15 +33,19 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 		fmt.Println("init peer sdk error:", err)
 	}
 	//create db in couchdb
-	if err := nodestru.Create_cipherkey_info(); err != nil {
-		fmt.Println("create cipherkey_info db error:", err)
+	c, err := clients.GetCouchdb(nodestru.Couchdb_addr)
+	if err != nil {
+		fmt.Println("get couchdb client error:", err)
 	}
-	if err := nodestru.Create_ciphertext_info(); err != nil {
-		fmt.Println("create ciphertext_info db error:", err)
+	if err := c.Create_ciphertext_info(); err != nil {
+		fmt.Println("create position_info db error:", err)
+	}
+	if err := c.Create_cipherkey_info(); err != nil {
+		fmt.Println("create cipherkey_info db error:", err)
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(9)
+	wg.Add(8)
 	//创建consumer
 	go consumeRegister(nodestru, &wg)
 	go consumeUpload(nodestru, &wg)
@@ -54,7 +58,7 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 	// fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
 	go consumeKeyUpload(nodestru, &wg)
 	go consumeReceiveKeyUpload(nodestru, &wg)
-	go consumeGroupChoose(nodestru, &wg)
+	// go consumeGroupChoose(nodestru, &wg)
 	// consumer3, err := clients.InitConsumer(nodestru.KafkaIp)
 	// if err != nil {
 	// 	fmt.Printf("fail to start err:%v\n", err)
@@ -196,18 +200,18 @@ func consumeReceiveFileRequestFromCenter(nodestru Nodestructure, wg *sync.WaitGr
 	}
 }
 
-func consumeGroupChoose(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "GroupChoose")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "GroupChoose", err)
-			return
-		}
-		err = chooseGroup(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerGroupChoose error:", err)
-		}
-	}
-}
+// func consumeGroupChoose(nodestru Nodestructure, wg *sync.WaitGroup) {
+// 	consumer := clients.InitConsumer(nodestru.KafkaIp, "GroupChoose")
+// 	wg.Done()
+// 	for {
+// 		msg, err := consumer.FetchMessage(context.Background())
+// 		if err != nil {
+// 			log.Printf("failed to read message from topic %s: %v\n", "GroupChoose", err)
+// 			return
+// 		}
+// 		err = chooseGroup(nodestru, msg.Value)
+// 		if err != nil {
+// 			fmt.Println("consumerGroupChoose error:", err)
+// 		}
+// 	}
+// }
