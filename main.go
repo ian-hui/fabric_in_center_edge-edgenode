@@ -21,15 +21,7 @@ func main() {
 		CenterAddr:   os.Getenv("CENTER_ADDR"),
 		ConfigPath:   "/conf/config.yaml",
 	}
-	// var peer0_org1 = NodeUtils.Nodestructure{
-	// 	KafkaIp:      "0.0.0.0:9092",
-	// 	Couchdb_addr: "http://admin:123456@0.0.0.0:7984",
-	// 	PeerNodeName: "peer0.org1.example.com:7051",
-	// 	OrgID:        "1",
-	// 	KeyPath:      "./fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk",
-	// 	CenterAddr:   "0.0.0.0:9091",
-	// 	ConfigPath:   "./cfg/org1conf.yaml",
-	// }
+	
 	//init node
 	node.InitPeerNode(peertopics)
 	//start websocket

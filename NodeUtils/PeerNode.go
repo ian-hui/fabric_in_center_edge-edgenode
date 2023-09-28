@@ -9,7 +9,6 @@ import (
 	"time"
 
 	_ "github.com/go-kivik/couchdb/v4" // The CouchDB driver
-	"github.com/segmentio/kafka-go"
 	//couchdb-go第三方库
 )
 
@@ -43,36 +42,35 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 	var wg sync.WaitGroup
 	wg.Add(9)
 	//创建consumer
-	consumer := clients.InitConsumer(nodestru.KafkaIp)
-	fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
-	go consumeRegister(consumer, nodestru, &wg)
-	go consumeUpload(consumer, nodestru, &wg)
-	go consumeFileReq(consumer, nodestru, &wg)
+	go consumeRegister(nodestru, &wg)
+	go consumeUpload(nodestru, &wg)
+	go consumeFileReq(nodestru, &wg)
 	// consumer2, err := clients.InitConsumer(nodestru.KafkaIp)
 	// if err != nil {
-	// 	fmt.Printf("fail to start consumer, err:%v\n", err)
+	// 	fmt.Printf("fail to start err:%v\n", err)
 	// 	return
 	// }
 	// fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
-	go consumeKeyUpload(consumer, nodestru, &wg)
-	go consumeReceiveKeyUpload(consumer, nodestru, &wg)
-	go consumeGroupChoose(consumer, nodestru, &wg)
+	go consumeKeyUpload(nodestru, &wg)
+	go consumeReceiveKeyUpload(nodestru, &wg)
+	go consumeGroupChoose(nodestru, &wg)
 	// consumer3, err := clients.InitConsumer(nodestru.KafkaIp)
 	// if err != nil {
-	// 	fmt.Printf("fail to start consumer, err:%v\n", err)
+	// 	fmt.Printf("fail to start err:%v\n", err)
 	// 	return
 	// }
 	fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
-	go consumeReceiveKeyReq(consumer, nodestru, &wg)
-	go consumeDataForwarding(consumer, nodestru, &wg)
-	go consumeReceiveFileRequestFromCenter(consumer, nodestru, &wg)
+	go consumeReceiveKeyReq(nodestru, &wg)
+	go consumeDataForwarding(nodestru, &wg)
+	go consumeReceiveFileRequestFromCenter(nodestru, &wg)
 	wg.Wait()
 }
 
-func consumeRegister(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeRegister(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "register")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "register", err)
 		}
@@ -84,10 +82,11 @@ func consumeRegister(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.Wa
 
 }
 
-func consumeUpload(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "upload")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "upload", err)
 		}
@@ -98,10 +97,11 @@ func consumeUpload(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.Wait
 	}
 }
 
-func consumeFileReq(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeFileReq(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "filereq")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "filereq", err)
 		}
@@ -112,11 +112,11 @@ func consumeFileReq(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.Wai
 	}
 }
 
-func consumeKeyUpload(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
-
+func consumeKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "KeyUpload")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "KeyUpload", err)
 		}
@@ -127,11 +127,11 @@ func consumeKeyUpload(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.W
 	}
 }
 
-func consumeReceiveKeyUpload(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
-
+func consumeReceiveKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveKeyUpload")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyUpload", err)
 		}
@@ -142,11 +142,11 @@ func consumeReceiveKeyUpload(consumer *kafka.Reader, nodestru Nodestructure, wg 
 	}
 }
 
-func consumeReceiveKeyReq(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
-
+func consumeReceiveKeyReq(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveKeyReq")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyReq", err)
 		}
@@ -157,10 +157,11 @@ func consumeReceiveKeyReq(consumer *kafka.Reader, nodestru Nodestructure, wg *sy
 	}
 }
 
-func consumeDataForwarding(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeDataForwarding(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "DataForwarding")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "DataForwarding", err)
 		}
@@ -171,10 +172,11 @@ func consumeDataForwarding(consumer *kafka.Reader, nodestru Nodestructure, wg *s
 	}
 }
 
-func consumeReceiveFileRequestFromCenter(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeReceiveFileRequestFromCenter(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveFileRequestFromCenter")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "ReceiveFileRequestFromCenter", err)
 		}
@@ -185,10 +187,11 @@ func consumeReceiveFileRequestFromCenter(consumer *kafka.Reader, nodestru Nodest
 	}
 }
 
-func consumeGroupChoose(consumer *kafka.Reader, nodestru Nodestructure, wg *sync.WaitGroup) {
+func consumeGroupChoose(nodestru Nodestructure, wg *sync.WaitGroup) {
+	consumer := clients.InitConsumer(nodestru.KafkaIp, "GroupChoose")
 	wg.Done()
 	for {
-		msg, err := consumer.ReadMessage(context.Background())
+		msg, err := consumer.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("failed to read message from topic %s: %v\n", "GroupChoose", err)
 		}

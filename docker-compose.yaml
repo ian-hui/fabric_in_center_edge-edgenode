@@ -38,6 +38,8 @@ services:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 0
+      AUTO_CREATE_TOPICS_ENABLE: 'true'
+      DELETE_TOPIC_ENABLE: 'true'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
@@ -48,25 +50,25 @@ services:
     networks:
       - kafka-test
 
-  edgenode-peer0-org1:
-    image: fabric-edgenode:latest
-    ports:
-      - "7080:8080"
-      - "7083:8083"
-    volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
-      - ./fixtures/channel-artifacts:/fixtures/channel-artifacts
-      - ./fixtures/crypto-config:/fixtures/crypto-config
-      - ./kafka_crypto:/kafka_crypto
-    environment:
-      - KAFKA_IP="kafka:9092"
-      - COUDB_ADDR="http://admin:123456@couchdb0:5984"
-      - PEER_NODE_NAME="peer0.org1.example.com:7051"
-      - ORG_ID = "org1"
-      - KEY_PATH = "/fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk"
-      - CENTER_ADDR = "center_kafka:9091"
-    depends_on:
-      - kafka.peer0.org1.example.com
-      - couchdb0
-    networks:
-      - kafka-test
+  # edgenode-peer0-org1:
+  #   image: fabric-edgenode:latest
+  #   ports:
+  #     - "7080:8080"
+  #     - "7083:8083"
+  #   volumes:
+  #     - ./cfg/org1conf.yaml:/conf/config.yaml
+  #     - ./fixtures/channel-artifacts:/fixtures/channel-artifacts
+  #     - ./fixtures/crypto-config:/fixtures/crypto-config
+  #     - ./kafka_crypto:/kafka_crypto
+  #   environment:
+  #     - KAFKA_IP="kafka:9092"
+  #     - COUDB_ADDR="http://admin:123456@couchdb0:5984"
+  #     - PEER_NODE_NAME="peer0.org1.example.com:7051"
+  #     - ORG_ID = "org1"
+  #     - KEY_PATH = "/fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/keystore/priv_sk"
+  #     - CENTER_ADDR = "center_kafka:9091"
+  #   depends_on:
+  #     - kafka.peer0.org1.example.com
+  #     - couchdb0
+  #   networks:
+  #     - kafka-test

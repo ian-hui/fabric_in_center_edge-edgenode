@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/go-kivik/kivik/v4"
@@ -32,6 +33,7 @@ func GetCouchdb(kivik_addr string) (*couchdbClient, error) {
 		mu.Lock()
 		defer mu.Unlock()
 		if couchdbConns == nil {
+			fmt.Println("init couchdb client" + kivik_addr)
 			client, err := kivik.New("couch", kivik_addr)
 			if err != nil {
 				return nil, err
