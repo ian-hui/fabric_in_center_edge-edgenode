@@ -27,7 +27,7 @@ func (t *Application) SetNodeInfo(nodeIP string, info []byte) (string, error) {
 }
 
 func (t *Application) GetNodeInfoAllRange(endpoint string) ([]byte, error) {
-	response, err := t.SdkEnvInfo.ChClient.Query(channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "rangeQuery", Args: [][]byte{[]byte(""), []byte("")}},
+	response, err := t.SdkEnvInfo.ChClient.Query(channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "rangeQuery", Args: [][]byte{[]byte("p"), []byte("q")}},
 		channel.WithTargetEndpoints(endpoint))
 	if err != nil {
 		return nil, fmt.Errorf("failed to query: %v", err)

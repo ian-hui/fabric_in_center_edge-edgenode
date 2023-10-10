@@ -1,10 +1,11 @@
 package NodeUtils
 
 import (
-	"context"
 	"fabric-edgenode/clients"
 	"fmt"
-	"log"
+	"os/exec"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -43,161 +44,34 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 	if err := c.Create_cipherkey_info(); err != nil {
 		fmt.Println("create cipherkey_info db error:", err)
 	}
-
 	var wg sync.WaitGroup
 	wg.Add(8)
+	consumer1, err := clients.InitConsumer(nodestru.KafkaIp)
+	if err != nil {
+		fmt.Printf("fail to start consumer, err:%v\n", err)
+		return
+	}
 	//创建consumer
-	go consumeRegister(nodestru, &wg)
-	go consumeUpload(nodestru, &wg)
-	go consumeFileReq(nodestru, &wg)
-	// consumer2, err := clients.InitConsumer(nodestru.KafkaIp)
-	// if err != nil {
-	// 	fmt.Printf("fail to start err:%v\n", err)
-	// 	return
-	// }
-	// fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
-	go consumeKeyUpload(nodestru, &wg)
-	go consumeReceiveKeyUpload(nodestru, &wg)
+	go consumerTopic(consumer1, nodestru, &wg, "register", register, "register error")
+	go consumerTopic(consumer1, nodestru, &wg, "upload", upload, "upload error")
+	go consumerTopic(consumer1, nodestru, &wg, "filereq", filerequest, "filereq error")
+	consumer2, err := clients.InitConsumer(nodestru.KafkaIp)
+	if err != nil {
+		fmt.Printf("fail to start err:%v\n", err)
+		return
+	}
+	go consumerTopic(consumer2, nodestru, &wg, "KeyUpload", keyUpload, "KeyUpload error")
+	go consumerTopic(consumer2, nodestru, &wg, "ReceiveKeyUpload", receivekeyUpload, "ReceiveKeyUpload error")
 	// go consumeGroupChoose(nodestru, &wg)
-	// consumer3, err := clients.InitConsumer(nodestru.KafkaIp)
-	// if err != nil {
-	// 	fmt.Printf("fail to start err:%v\n", err)
-	// 	return
-	// }
-	fmt.Println(nodestru.KafkaIp, "init peer-consumer1 begin")
-	go consumeReceiveKeyReq(nodestru, &wg)
-	go consumeDataForwarding(nodestru, &wg)
-	go consumeReceiveFileRequestFromCenter(nodestru, &wg)
+	consumer3, err := clients.InitConsumer(nodestru.KafkaIp)
+	if err != nil {
+		fmt.Printf("fail to start err:%v\n", err)
+		return
+	}
+	go consumerTopic(consumer3, nodestru, &wg, "ReceiveKeyReq", receivekeyReq, "ReceiveKeyReq error")
+	go consumerTopic(consumer3, nodestru, &wg, "DataForwarding", dataForwarding, "DataForwarding error")
+	go consumerTopic(consumer3, nodestru, &wg, "ReceiveFileRequestFromCenter", receiveFileRequestFormCenter, "ReceiveFileRequestFromCenter error")
 	wg.Wait()
-}
-
-func consumeRegister(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "register")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "register", err)
-			return
-		}
-		err = register(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerRegister error:", err)
-		}
-	}
-
-}
-
-func consumeUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "upload")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "upload", err)
-			return
-		}
-		err = upload(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerUpload error:", err)
-		}
-	}
-}
-
-func consumeFileReq(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "filereq")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "filereq", err)
-			return
-		}
-		err = filerequest(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerFileReq error:", err)
-		}
-	}
-}
-
-func consumeKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "KeyUpload")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "KeyUpload", err)
-			return
-		}
-		err = keyUpload(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerKeyUpload error:", err)
-		}
-	}
-}
-
-func consumeReceiveKeyUpload(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveKeyUpload")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyUpload", err)
-			return
-		}
-		err = receivekeyUpload(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerReceiveKeyUpload error:", err)
-		}
-	}
-}
-
-func consumeReceiveKeyReq(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveKeyReq")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "ReceiveKeyReq", err)
-			return
-		}
-		err = receivekeyReq(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerReceiveKeyReq error:", err)
-		}
-	}
-}
-
-func consumeDataForwarding(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "DataForwarding")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "DataForwarding", err)
-			return
-		}
-		err = dataForwarding(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerDataForwarding error:", err)
-		}
-	}
-}
-
-func consumeReceiveFileRequestFromCenter(nodestru Nodestructure, wg *sync.WaitGroup) {
-	consumer := clients.InitConsumer(nodestru.KafkaIp, "ReceiveFileRequestFromCenter")
-	wg.Done()
-	for {
-		msg, err := consumer.FetchMessage(context.Background())
-		if err != nil {
-			log.Printf("failed to read message from topic %s: %v\n", "ReceiveFileRequestFromCenter", err)
-			return
-		}
-		err = receiveFileRequestFormCenter(nodestru, msg.Value)
-		if err != nil {
-			fmt.Println("consumerReceiveFileRequestFromCenter error:", err)
-		}
-	}
 }
 
 // func consumeGroupChoose(nodestru Nodestructure, wg *sync.WaitGroup) {
@@ -215,3 +89,29 @@ func consumeReceiveFileRequestFromCenter(nodestru Nodestructure, wg *sync.WaitGr
 // 		}
 // 	}
 // }
+
+func GetNodeLoadService() (float64, error) {
+	cmd := exec.Command("ps", "-p", "1", "-o", "%cpu")
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Println("output error:", err)
+		return 0, err
+	}
+	lines := strings.Split(string(out), "\n")
+	if len(lines) < 2 {
+		fmt.Println("Invalid output")
+		return 0, err
+	}
+	fields := strings.Fields(lines[1])
+	if len(fields) < 1 {
+		fmt.Println("Invalid output")
+		return 0, err
+	}
+	f, err := strconv.ParseFloat(fields[0], 64)
+	if err != nil {
+		fmt.Println("Invalid output")
+		return 0, err
+	}
+	return f, nil
+
+}

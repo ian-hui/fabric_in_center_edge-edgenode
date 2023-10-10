@@ -8,6 +8,7 @@ import (
 type Nodestructure struct {
 	KafkaIp          string
 	Couchdb_addr     string
+	ZookeeperAddr    string
 	PeerNodeName     string
 	OrgID            string
 	KeyPath          string
@@ -30,40 +31,38 @@ type FileInfo struct {
 }
 
 type FileRequest struct {
-	FileId string `json:"FileId"`
-	UserId string `json:"UserId"`
-	// AreaId      string `json:"AreaId"`
-	Kafka_addr string `json:"kafka_addr"`
-	// storageFlag bool   `json:"storageFlag"`
+	FileId     string `json:"FileId"`
+	UserId     string `json:"UserId"`
+	Kafka_addr string `json:"Kafka_addr"`
 }
 
 type FileRequestDTO struct {
 	FileId     string `json:"FileId"`
 	Ciphertext string `json:"Ciphertext"`
-	_id        string `json:"_id"`
-	_rev       string `json:"_rev"`
+	Id         string `json:"_id"`
+	Rev        string `json:"_rev"`
 }
 
 type FilePositionInfoDTO struct {
 	FileId   string `json:"FileId"`
 	Position string `json:"Position"`
 	AreaId   string `json:"AreaId"`
-	_rev     string `json:"_rev"`
-	_id      string `json:"_id"`
+	Rev      string `json:"_rev"`
+	Id       string `json:"_id"`
 }
 
 type KeyDetailInfoDTO struct {
 	FileId string `json:"FileId"`
 	Key    string `json:"Key"`
-	_rev   string `json:"_rev"`
-	_id    string `json:"_id"`
+	Rev    string `json:"_rev"`
+	Id     string `json:"_id"`
 }
 
 type KeyDetailInfo struct {
 	FileId  string `json:"FileId"`
 	Signlen int    `json:"Signlen"`
 	Key     []byte `json:"Key"`
-	UserId  string `json:UserId`
+	UserId  string `json:"UserId"`
 }
 
 func (k *KeyDetailInfo) SetKeyFromBase64(encoded string) error {
@@ -93,8 +92,9 @@ type KeyUploadInfo struct {
 }
 
 type NodeInfo struct {
-	NodeAddr    string
-	LeftStorage string
-	locationX   string
-	locationY   string
+	NodeInfoId   string
+	NodePeerName string
+	LeftStorage  string
+	LocationX    string
+	LocationY    string
 }

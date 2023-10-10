@@ -32,29 +32,12 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 
 	//然后把信息上传到center
 	fmt.Println("<----begin to upload position to center---->")
-	//实例化一个groupchooser
-	gc := &groupChooser{
-		storage_weight:            0.5,
-		distance_weight:           0.5,
-		standard_deviation_weight: 0.5,
-		curNodeInfo:               nodestru.NodeInfo,
-	}
-
-	//获取分布式锁：TODO
-	//计算出group
-	group, _, _, err := gc.chooseGroup(5)
-	if err != nil {
-		return fmt.Errorf("choose group error:%v", err)
-	}
-
-	//修改nodeinfo：TODO
-	//放回分布式锁：TODO
 
 	//密文位置，密钥位置
 	file_postion_info := PositionInfo{
-		FileId:     fileif.FileId,
-		Position:   nodestru.KafkaIp,
-		GroupAddrs: group,
+		FileId:   fileif.FileId,
+		Position: nodestru.KafkaIp,
+		// GroupAddrs: group,
 	}
 	res, err := json.Marshal(file_postion_info)
 	if err != nil {
@@ -71,27 +54,6 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 	return nil
 }
 
-// func chooseGroup(nodestru Nodestructure, msg []byte) (err error) {
-// 	//实例化一个groupchooser
-// 	gc := &groupChooser{
-// 		storage_weight:            0.5,
-// 		distance_weight:           0.5,
-// 		standard_deviation_weight: 0.5,
-// 		curNodeInfo:               nodestru.NodeInfo,
-// 	}
-
-// 	group, delay, sd, err := gc.chooseGroup(6)
-// 	if err != nil {
-// 		return fmt.Errorf("choose group error:%v", err)
-// 	}
-// 	marshaled_group, err := json.Marshal(group)
-// 	if err != nil {
-// 		return fmt.Errorf("marshal error:%v", err)
-// 	}
-// 	SendData(string(msg), marshaled_group)
-// 	return
-// }
-
 // 上传密钥
 func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	var keyinfostru KeyUploadInfo
@@ -103,17 +65,34 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("get couchdb client error: %v", err)
 	}
+	fmt.Println("begin to upload key locally")
+	//实例化一个groupchooser
+	group, _, _, err := NewGroupChooser(nodestru.NodeInfo, 0.5, 0.5, 0.5).ChooseGroupWithLock(nodestru)
+	if err != nil {
+		return fmt.Errorf("keyupload choose group error:%v", err)
+	}
+
+	fmt.Println("group:", group)
+
+	check_map := make(map[string]bool)
+	for i := range group {
+		check_map[group[i]] = true
+	}
 	//获取这个组内的所有ip，用于存放在中心节点中作为元数据
 	group_position := make([]string, 0, len(*keyinfostru.Upload_Infomation))
 	for kafkaip := range *keyinfostru.Upload_Infomation {
+		if _, ok := check_map[kafkaip]; !ok {
+			continue
+		}
 		group_position = append(group_position, kafkaip)
 	}
+
 	for kafkaip, key_info := range *keyinfostru.Upload_Infomation {
 		var (
 			err              error
 			user_information sdkInit.UserInfo
 		)
-		if kafkaip == nodestru.KafkaIp {
+		if kafkaip == nodestru.KafkaIp && check_map[kafkaip] {
 			//check the key not exist
 			check := client.CheckNotExistence(key_info.FileId, "cipherkey_info")
 			if !check {
@@ -145,13 +124,11 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 			}
 
 			//send position to center
-
 			res, err := json.Marshal(k_pos)
 			if err != nil {
 				return fmt.Errorf("marshal error:%v", err)
 			}
-			topic := "UploadKeyPosition"
-			err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
+			err = ProducerAsyncSending(res, "UploadKeyPosition", nodestru.CenterAddr)
 			if err != nil {
 				return fmt.Errorf("producer async sending err:%v", err)
 			}

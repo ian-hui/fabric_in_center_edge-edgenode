@@ -1,44 +1,47 @@
 package clients
 
 import (
-	"sync"
+	"fmt"
 
-	"github.com/segmentio/kafka-go"
+	"github.com/IBM/sarama"
 )
 
 var (
-	producerConns *kafka.Writer
+	producerConns *sarama.AsyncProducer
 )
 
-func InitProducer(kafka_addr string) {
-	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: []string{kafka_addr},
-		Async:   true,
-	})
-	producerConns = writer
+func InitProducer(kafka_addr string) error {
+	producerconfig := sarama.NewConfig()
+	producerconfig.Producer.RequiredAcks = 1        // 发送完数据需要leader和follow都确认
+	producerconfig.Producer.Return.Successes = true // 成功交付的消息将在success channel返回
+	producer, err := sarama.NewAsyncProducer([]string{kafka_addr}, producerconfig)
+	if err != nil {
+		return fmt.Errorf("init kafka producer error: %v", err)
+	}
+	fmt.Println("producer" + kafka_addr + "init success")
+	producerConns = &producer
+	return nil
 }
 
-func GetProducer(kafka_addr string) *kafka.Writer {
+func GetProducer(kafka_addr string) sarama.AsyncProducer {
 	if producerConns == nil {
-		mu := sync.Mutex{}
 		mu.Lock()
 		defer mu.Unlock()
 		if producerConns == nil {
-			InitProducer(kafka_addr)
+			err := InitProducer(kafka_addr)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
-	return producerConns
+	return *producerConns
 }
 
-func InitConsumer(kafka_addr string, topic string) *kafka.Reader {
-	config := kafka.ReaderConfig{
-		Brokers:  []string{kafka_addr},
-		Topic:    topic,
-		MinBytes: 10e3, // 最小读取字节数
-		MaxBytes: 10e6, // 最大读取字节数
+func InitConsumer(kafka_addr string) (sarama.Consumer, error) {
+	consumer, err := sarama.NewConsumer([]string{kafka_addr}, nil)
+	if err != nil {
+		return nil, fmt.Errorf("init kafka consumer error: %v", err)
 	}
 
-	// 创建Kafka Reader对象
-	reader := kafka.NewReader(config)
-	return reader
+	return consumer, nil
 }

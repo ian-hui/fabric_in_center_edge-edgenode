@@ -20,7 +20,6 @@ var (
 	resu   int64
 	timers sync.Map
 	//maintain a connection map (connection,userid)
-	connections      sync.Map
 	sendDataChannels sync.Map
 	upgrader         = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -46,7 +45,7 @@ func WebsocketStarter(w http.ResponseWriter, r *http.Request) {
 func HandleWebsocket(ws *websocket.Conn) {
 
 	//welcome message
-	welcomeMessage := "请选择:1.上传密钥2.请求密文密钥, 并输入连接的节点地址"
+	welcomeMessage := "请选择:1.上传密钥2.请求密文密钥"
 	err := ws.WriteJSON(welcomeMessage)
 	if err != nil {
 		log.Println(err)
@@ -58,34 +57,78 @@ func HandleWebsocket(ws *websocket.Conn) {
 		log.Println("failed to readmessage : ", err)
 		return
 	}
-	choose := strings.Split(string(msg), ",")
-	if len(choose) != 2 {
+	if len(msg) == 0 {
 		log.Println("failed to readmessage : ", err)
 		return
 	}
-	Option := choose[0]
-	kafka_ip := choose[1]
+	Option := string(msg)
 	if Option == "1" {
-		Attribute := Test_data1.Attribute
-		User_id := Test_data1.Username
-		user_key_path := Test_data1.Userkeypath
-		file_id := Test_data1.Fileid
+		fmt.Println("websocket start")
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			log.Println("failed to readmessage : ", err)
+			return
+		}
+		var test_D Test_data
+		err = json.Unmarshal(msg, &test_D)
+		if err != nil {
+			log.Println("failed to unmarshal : ", err)
+			return
+		}
 
-		ws.WriteJSON("开始传输密钥")
+		Attribute := test_D.Attribute
+		User_id := test_D.Username
+		user_key_path := "/kafka_crypto/ianhui.private.pem"
+		file_id := test_D.Fileid
 		upload_infomation := make(map[string]KeyDetailInfo)
+
+		//注册
+		userinformation := sdkInit.UserInfo{
+			UserId:    test_D.Username,
+			Username:  test_D.Username,
+			Attribute: test_D.Attribute,
+		}
+		res, err := json.Marshal(userinformation)
+		if err != nil {
+			fmt.Printf("fail to Serialization, err:%v\n", err)
+			return
+		}
+		if err = ProducerAsyncSending(res, "register", os.Getenv("KAFKA_IP")); err != nil {
+			ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			return
+		}
+
+		const kb = 100
+		file := strings.Repeat("a", 100*kb) // 5MB string
+		//构建一个user信息结构
+		fileinfomation := FileInfo{
+			FileId:     test_D.Fileid,
+			Ciphertext: file,
+		}
+
+		// 连接kafka
+		r, err := json.Marshal(fileinfomation)
+		if err != nil {
+			fmt.Printf("fail to Serialization, err:%v\n", err)
+			return
+		}
+		if err = ProducerAsyncSending(r, "upload", os.Getenv("KAFKA_IP")); err != nil {
+			ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			return
+		}
 
 		//生成测试key
 		str := strings.Repeat("a", 16)
-		secrets, err := shamir.Split([]byte(str), 4, 2)
+		secrets, err := shamir.Split([]byte(str), 8, 3)
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		//test
-		for i := 0; i < 4; i++ {
-			pubkey := &sdkInit.GetNodePrivateKey(Test_data1.Keypath[i]).PublicKey
+		for i := range test_D.Keypath {
+			pubkey := &sdkInit.GetNodePrivateKey(test_D.Keypath[i]).PublicKey
 			encrypted, sign_len := sdkInit.ClientEncryptionByPubECC(user_key_path, pubkey, secrets[i])
-			upload_infomation[Test_data1.Ip[i]] = KeyDetailInfo{
+			upload_infomation[test_D.Addr[i]] = KeyDetailInfo{
 				FileId:  file_id,
 				Key:     encrypted,
 				Signlen: sign_len,
@@ -96,13 +139,13 @@ func HandleWebsocket(ws *websocket.Conn) {
 			Upload_Infomation: &upload_infomation,
 			Attribute:         Attribute,
 		}
-		res, err := json.Marshal(keyuploadinfo)
+		res, err = json.Marshal(keyuploadinfo)
 		if err != nil {
 			log.Printf("fail to Serialization, err:%v\n", err)
 			return
 		}
 		topic := "KeyUpload" //操作名
-		err = ProducerAsyncSending(res, topic, kafka_ip)
+		err = ProducerAsyncSending(res, topic, os.Getenv("KAFKA_IP"))
 		if err != nil {
 			err := ws.WriteJSON(err)
 			if err != nil {
@@ -115,9 +158,15 @@ func HandleWebsocket(ws *websocket.Conn) {
 	}
 	//request for file and key
 	if Option == "2" {
+		//⌛️计时器
 		startTime := time.Now()
-		userid := "ianhui"
-		fileid := "1"
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			log.Println("failed to readmessage : ", err)
+			return
+		}
+		userid := strings.Split(string(msg), ",")[0]
+		fileid := strings.Split(string(msg), ",")[1]
 		//set userid and bind the websocket conn and userid
 		// Create a new channel for the user if it doesn't exist
 		if _, ok := sendDataChannels.Load(userid); !ok {
@@ -154,7 +203,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 						temp++
 						if temp == 4 {
 							duration := time.Since(startTime)
-							fmt.Println("the duration is ", duration)
+							ws.WriteMessage(websocket.TextMessage, []byte(duration.String()))
 							resu = resu + int64(duration/time.Millisecond)
 							return
 						}

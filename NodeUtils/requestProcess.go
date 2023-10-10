@@ -91,6 +91,9 @@ func receivekeyReq(nodestru Nodestructure, msg []byte) (err error) {
 	if IsIdentical(user_information.Attribute, file_access.Attribute) {
 		//take out the key if imformation is match
 		client, err := clients.GetCouchdb(nodestru.Couchdb_addr)
+		if err != nil {
+			return fmt.Errorf("get couchdb client error: %v", err)
+		}
 		rs, err := client.Getinfo(requestinfo.FileId, "cipherkey_info")
 		if err != nil {
 			if kivik.StatusCode(err) == 404 {

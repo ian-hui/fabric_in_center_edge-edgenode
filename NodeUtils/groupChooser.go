@@ -42,11 +42,11 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 	Cur_group = make([]string, 0)
 
 	//获取所有节点的距离以及剩余空间信息
-	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodeAddr, "node").GetNodeInfoAllRange(g.curNodeInfo.NodeAddr)
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfoAllRange(g.curNodeInfo.NodePeerName)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
-
+	fmt.Println(string(nodelist_byte))
 	//nodelist_byte 转化为 nodelist
 	if err := json.Unmarshal(nodelist_byte, &nodelist); err != nil {
 		return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
@@ -79,7 +79,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 			maxstor = nodeStorage
 		}
 		//候选节点
-		candidate_nodeinfoMap[nodeif.NodeAddr] = &processed_nodeinfo{
+		candidate_nodeinfoMap[nodeif.NodePeerName] = &processed_nodeinfo{
 			distance: dist,
 			storage:  nodeStorage,
 		}
@@ -104,32 +104,44 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 		//选择这些节点
 		delay += candidate_nodeinfoMap[sortedMap[i].Key].distance * 100
 		//减少这些节点的剩余空间
-		num, err := strconv.Atoi(sortedMap[i].Key)
+		b, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.NodePeerName)
 		if err != nil {
-			panic(err)
+			return nil, 0, 0, fmt.Errorf("GetNodeInfo error: %v", err)
 		}
-		nodelist[num-1].LeftStorage = strconv.Itoa(candidate_nodeinfoMap[sortedMap[i].Key].storage - 1)
+		var node NodeInfo
+		if err := json.Unmarshal(b, &node); err != nil {
+			return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
+		}
+		node.LeftStorage = strconv.Itoa(candidate_nodeinfoMap[sortedMap[i].Key].storage - 1)
+		res, err := json.Marshal(node)
+		if err != nil {
+			return nil, 0, 0, fmt.Errorf("json.Marshal error: %v", err)
+		}
+		if s, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").SetNodeInfo(node.NodePeerName, res); err != nil {
+			return nil, 0, 0, fmt.Errorf("SetNodeInfo error: %v", err)
+		} else {
+			fmt.Println(s)
+		}
 	}
-
 	//平均延迟
 	delay /= float64(k)
 	return
 }
 
 func euclideanDistance(n1, n2 *NodeInfo) float64 {
-	n1x, err := strconv.ParseFloat(n1.locationX, 64)
+	n1x, err := strconv.ParseFloat(n1.LocationX, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
-	n1y, err := strconv.ParseFloat(n1.locationY, 64)
+	n1y, err := strconv.ParseFloat(n1.LocationY, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
-	n2x, err := strconv.ParseFloat(n2.locationX, 64)
+	n2x, err := strconv.ParseFloat(n2.LocationX, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
-	n2y, err := strconv.ParseFloat(n2.locationY, 64)
+	n2y, err := strconv.ParseFloat(n2.LocationY, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -188,7 +200,7 @@ func (g *groupChooser) getScore(dist float64, storage float64, sd float64) float
 
 func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, sd float64, err error) {
 	var nodelist []NodeInfo
-	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodeAddr, "node").GetNodeInfoAllRange(g.curNodeInfo.NodeAddr)
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfoAllRange(g.curNodeInfo.NodePeerName)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
@@ -211,7 +223,7 @@ func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, 
 		//如果本节点的剩余空间不为0
 		// if g.curNodeInfo.LeftStorage != "0" {
 		//候选节点距离以本节点为中心
-		candidate_nodeinfoMap[nodeif.NodeAddr] = &processed_nodeinfo{
+		candidate_nodeinfoMap[nodeif.NodePeerName] = &processed_nodeinfo{
 			storage:  nodeStorage,
 			distance: euclideanDistance(g.curNodeInfo, &nodeif),
 		}
@@ -244,5 +256,33 @@ func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, 
 		//取出这个节点
 		all_candidate = append(all_candidate[:rand_nodeid], all_candidate[rand_nodeid+1:]...)
 	}
+	return
+}
+
+func NewGroupChooser(curNodeInfo *NodeInfo, storage_weight, distance_weight, standard_deviation_weight float64) *groupChooser {
+	return &groupChooser{
+		curNodeInfo:               curNodeInfo,
+		storage_weight:            storage_weight,
+		distance_weight:           distance_weight,
+		standard_deviation_weight: standard_deviation_weight,
+	}
+}
+
+func (gc *groupChooser) ChooseGroupWithLock(nodestru Nodestructure) (group []string, delay float64, sd float64, err error) {
+	//获取分布式锁
+	zkl, err := clients.NewZooKeeperLock([]string{nodestru.ZookeeperAddr}, "/mylock", nodestru.KafkaIp)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("NewZooKeeperLock error:%v", err)
+	}
+	if err := zkl.Lock(); err != nil {
+		return nil, 0, 0, fmt.Errorf("Lock error:%v", err)
+	}
+	//选择group
+	group, delay, sd, err = gc.chooseGroup(5)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("chooseGroup error:%v", err)
+	}
+	//释放分布式锁
+	defer zkl.Unlock()
 	return
 }

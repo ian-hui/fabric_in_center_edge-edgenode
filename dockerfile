@@ -15,6 +15,8 @@ RUN go build -o fabric-edgenode
 
 FROM debian:bullseye-slim
 
+RUN apt-get update && apt-get install -y procps
+
 # 从builder镜像中把配置文件拷贝到当前目录
 COPY ./cfg /conf
 COPY ./kafka_crypto /kafka_crypto

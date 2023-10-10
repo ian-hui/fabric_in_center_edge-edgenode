@@ -91,32 +91,20 @@ func Upload(ctx *gin.Context) {
 	})
 }
 
-// filerequest ：user request for file
-// 10.0.0.144:8083/upload
-// POST
-func Filerequest(ctx *gin.Context) {
-	fmt.Println("<--------service request file--------->")
+//获取节点负载信息
+func GetNodeLoad(ctx *gin.Context) {
+	fmt.Println("<--------service get node load--------->")
 	//提取信息
-	kafkaIp := ctx.Query("kafkaIp")
-	FileId := ctx.Query("fileId")
-	UserId := ctx.Query("userId")
-	FilerequestStruct := FileRequest{
-		FileId: FileId,
-		UserId: UserId,
-	}
-	res, err := json.Marshal(FilerequestStruct)
-	if err != nil {
-		fmt.Printf("fail to Serialization, err:%v\n", err)
-		return
-	}
-	topic := "filereq" //操作名
-	err = ProducerAsyncSending(res, topic, kafkaIp)
-	if err != nil {
-		ctx.JSON(400, gin.H{
-			"message": err,
+	if f, err := GetNodeLoadService(); err != nil {
+		ctx.JSON(500, gin.H{
+			"load":  0,
+			"error": err,
+		})
+	} else {
+		ctx.JSON(200, gin.H{
+			"load":  f,
+			"error": nil,
 		})
 	}
-	ctx.JSON(200, gin.H{
-		"message": "filerequest send success",
-	})
+
 }
