@@ -73,7 +73,6 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	}
 
 	fmt.Println("group:", group)
-
 	check_map := make(map[string]bool)
 	for i := range group {
 		check_map[group[i]] = true

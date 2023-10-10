@@ -214,7 +214,7 @@ func consumerTopic(consumer sarama.Consumer, nodestru Nodestructure, wg *sync.Wa
 	if err != nil {
 		panic(err)
 	}
-	defer wg.Done()
+	wg.Done()
 	for {
 		select {
 		case msg := <-partitonConsumer.Messages():

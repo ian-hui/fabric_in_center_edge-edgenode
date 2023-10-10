@@ -3,6 +3,7 @@ package NodeUtils
 import (
 	"encoding/json"
 	"fabric-edgenode/clients"
+	"fabric-edgenode/models"
 	"fmt"
 	"math"
 	"math/rand"
@@ -16,7 +17,7 @@ type groupChooser struct {
 	distance_weight           float64
 	standard_deviation_weight float64
 	// Nodestru Nodestructure
-	curNodeInfo *NodeInfo
+	curNodeInfo *models.NodeInfo
 }
 
 type processed_nodeinfo struct {
@@ -33,7 +34,7 @@ type kv struct {
 
 func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd float64, err error) {
 	var (
-		nodelist              []NodeInfo
+		nodelist              []models.NodeInfo
 		candidate_nodeinfoMap = make(map[string]*processed_nodeinfo)
 		mindist, maxdist      = math.MaxFloat64, 0.0
 		minstor, maxstor      = math.MaxInt64, 0
@@ -42,7 +43,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 	Cur_group = make([]string, 0)
 
 	//获取所有节点的距离以及剩余空间信息
-	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfoAllRange(g.curNodeInfo.NodePeerName)
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfoAllRange(g.curNodeInfo.PeerNodeName)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
@@ -79,7 +80,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 			maxstor = nodeStorage
 		}
 		//候选节点
-		candidate_nodeinfoMap[nodeif.NodePeerName] = &processed_nodeinfo{
+		candidate_nodeinfoMap[nodeif.PeerNodeName] = &processed_nodeinfo{
 			distance: dist,
 			storage:  nodeStorage,
 		}
@@ -104,11 +105,11 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 		//选择这些节点
 		delay += candidate_nodeinfoMap[sortedMap[i].Key].distance * 100
 		//减少这些节点的剩余空间
-		b, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.NodePeerName)
+		b, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.PeerNodeName)
 		if err != nil {
 			return nil, 0, 0, fmt.Errorf("GetNodeInfo error: %v", err)
 		}
-		var node NodeInfo
+		var node models.NodeInfo
 		if err := json.Unmarshal(b, &node); err != nil {
 			return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
 		}
@@ -117,7 +118,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 		if err != nil {
 			return nil, 0, 0, fmt.Errorf("json.Marshal error: %v", err)
 		}
-		if s, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").SetNodeInfo(node.NodePeerName, res); err != nil {
+		if s, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").SetNodeInfo(node.PeerNodeName, res); err != nil {
 			return nil, 0, 0, fmt.Errorf("SetNodeInfo error: %v", err)
 		} else {
 			fmt.Println(s)
@@ -128,7 +129,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 	return
 }
 
-func euclideanDistance(n1, n2 *NodeInfo) float64 {
+func euclideanDistance(n1, n2 *models.NodeInfo) float64 {
 	n1x, err := strconv.ParseFloat(n1.LocationX, 64)
 	if err != nil {
 		fmt.Println(err)
@@ -169,7 +170,7 @@ func sortMap(m map[string]*processed_nodeinfo) []kv {
 	return ss
 }
 
-func (g *groupChooser) getStandardDeviation(nodelist []NodeInfo) float64 {
+func (g *groupChooser) getStandardDeviation(nodelist []models.NodeInfo) float64 {
 
 	sum := 0
 	for _, nodeif := range nodelist {
@@ -199,8 +200,8 @@ func (g *groupChooser) getScore(dist float64, storage float64, sd float64) float
 }
 
 func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, sd float64, err error) {
-	var nodelist []NodeInfo
-	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.NodePeerName, "node").GetNodeInfoAllRange(g.curNodeInfo.NodePeerName)
+	var nodelist []models.NodeInfo
+	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfoAllRange(g.curNodeInfo.PeerNodeName)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
@@ -223,7 +224,7 @@ func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, 
 		//如果本节点的剩余空间不为0
 		// if g.curNodeInfo.LeftStorage != "0" {
 		//候选节点距离以本节点为中心
-		candidate_nodeinfoMap[nodeif.NodePeerName] = &processed_nodeinfo{
+		candidate_nodeinfoMap[nodeif.PeerNodeName] = &processed_nodeinfo{
 			storage:  nodeStorage,
 			distance: euclideanDistance(g.curNodeInfo, &nodeif),
 		}
@@ -259,7 +260,7 @@ func (g *groupChooser) randomChooser(k int) (Cur_group []string, delay float64, 
 	return
 }
 
-func NewGroupChooser(curNodeInfo *NodeInfo, storage_weight, distance_weight, standard_deviation_weight float64) *groupChooser {
+func NewGroupChooser(curNodeInfo *models.NodeInfo, storage_weight, distance_weight, standard_deviation_weight float64) *groupChooser {
 	return &groupChooser{
 		curNodeInfo:               curNodeInfo,
 		storage_weight:            storage_weight,

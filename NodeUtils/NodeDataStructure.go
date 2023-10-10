@@ -2,6 +2,7 @@ package NodeUtils
 
 import (
 	"encoding/base64"
+	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 )
 
@@ -14,7 +15,7 @@ type Nodestructure struct {
 	KeyPath          string
 	CenterAddr       string
 	ConfigPath       string
-	NodeInfo         *NodeInfo
+	NodeInfo         *models.NodeInfo
 	UserChannel_info *sdkInit.SdkEnvInfo
 }
 
@@ -89,12 +90,4 @@ type DataSend2clientInfo struct {
 type KeyUploadInfo struct {
 	Upload_Infomation *map[string]KeyDetailInfo
 	Attribute         []string
-}
-
-type NodeInfo struct {
-	NodeInfoId   string
-	NodePeerName string
-	LeftStorage  string
-	LocationX    string
-	LocationY    string
 }

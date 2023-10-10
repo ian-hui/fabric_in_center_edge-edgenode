@@ -144,8 +144,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 			log.Printf("fail to Serialization, err:%v\n", err)
 			return
 		}
-		topic := "KeyUpload" //操作名
-		err = ProducerAsyncSending(res, topic, os.Getenv("KAFKA_IP"))
+		err = ProducerAsyncSending(res, "KeyUpload", os.Getenv("KAFKA_IP"))
 		if err != nil {
 			err := ws.WriteJSON(err)
 			if err != nil {
@@ -182,8 +181,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 			fmt.Printf("fail to Serialization, err:%v\n", err)
 			return
 		}
-		topic := "filereq"
-		err = ProducerAsyncSending(res, topic, os.Getenv("KAFKA_IP"))
+		err = ProducerAsyncSending(res, "filereq", os.Getenv("KAFKA_IP"))
 		if err != nil {
 			err := ws.WriteJSON(err)
 			if err != nil {

@@ -6,199 +6,199 @@ networks:
 
 services:
 
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - fixtures_test
+  # zookeeper:
+  #   image: wurstmeister/zookeeper:latest
+  #   container_name: zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   ports:
+  #     - "2181:2181"
+  #   networks:
+  #     - fixtures_test
 
-  zoonavigator:
-    image: elkozmon/zoonavigator:latest
-    ports:
-      - 2182:2182
-    environment:
-      ZOO_HOSTS: 'zookeeper:2181'
-      HTTP_PORT: 2182
-    links:
-      - zookeeper
-    networks:
-      - fixtures_test
+  # zoonavigator:
+  #   image: elkozmon/zoonavigator:latest
+  #   ports:
+  #     - 2182:2182
+  #   environment:
+  #     ZOO_HOSTS: 'zookeeper:2181'
+  #     HTTP_PORT: 2182
+  #   links:
+  #     - zookeeper
+  #   networks:
+  #     - fixtures_test
 
-  kafka0:
-    image: wurstmeister/kafka:latest
-    container_name: kafka0
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 0
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka0:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka0:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka0
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 0
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka0'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka0:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  kafka1:
-    image: wurstmeister/kafka:latest
-    container_name: kafka1
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka1:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka1
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka1'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  kafka2:
-    image: wurstmeister/kafka:latest
-    container_name: kafka2
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 2
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka2:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka2
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 2
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka2'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  kafka3:
-    image: wurstmeister/kafka:latest
-    container_name: kafka3
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 3
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka3:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka3
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 3
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka3'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
   
-  kafka4:
-    image: wurstmeister/kafka:latest
-    container_name: kafka4
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 4
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka4:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka4:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka4
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 4
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka4'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka4:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  kafka5:
-    image: wurstmeister/kafka:latest
-    container_name: kafka5
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 5
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka5:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka5:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka5
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 5
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka5'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka5:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
   
-  kafka6:
-    image: wurstmeister/kafka:latest
-    container_name: kafka6
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 6
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka6:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka6:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka6
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 6
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka6'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka6:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  kafka7:
-    image: wurstmeister/kafka:latest
-    container_name: kafka7
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 7
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka7:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # kafka7:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: kafka7
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 7
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/kafka7'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka7:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
 
-  centerkafka:
-    image: wurstmeister/kafka:latest
-    container_name: centerkafka
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 8
-      AUTO_CREATE_TOPICS_ENABLE: 'true'
-      DELETE_TOPIC_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://centerkafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-    networks:
-      - fixtures_test
+  # centerkafka:
+  #   image: wurstmeister/kafka:latest
+  #   container_name: centerkafka
+  #   depends_on:
+  #     - zookeeper
+  #   environment:
+  #     KAFKA_BROKER_ID: 8
+  #     AUTO_CREATE_TOPICS_ENABLE: 'true'
+  #     DELETE_TOPIC_ENABLE: 'true'
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181/centerkafka'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://centerkafka:9092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #   networks:
+  #     - fixtures_test
   
 
   edgenode-peer0-org1:

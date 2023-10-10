@@ -1,8 +1,11 @@
 package clients
 
 import (
+	"encoding/json"
+	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -71,4 +74,19 @@ func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
 	default:
 		panic(fmt.Sprintln(">>channel", PeerNodeName, "GetPeerFabric error: unknown app type"))
 	}
+}
+
+func InitNodeInfo(nodeinfo models.NodeInfo) error {
+	//初始化节点信息
+	nodeInfo_byte, err := json.Marshal(nodeinfo)
+	if err != nil {
+		return fmt.Errorf("json.Marshal error: %v", err)
+	}
+	s, err := GetPeerFabric(nodeinfo.PeerNodeName, "node").SetNodeInfo(nodeinfo.PeerNodeName, nodeInfo_byte)
+	if err != nil {
+		return fmt.Errorf("SetNodeInfo error: %v", err)
+	}
+	log.Println(">>channel", nodeinfo.PeerNodeName, "InitNodeInfo successful", s)
+	return nil
+
 }

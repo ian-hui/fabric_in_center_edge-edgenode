@@ -2,6 +2,7 @@ package main
 
 import (
 	"fabric-edgenode/NodeUtils"
+	"fabric-edgenode/models"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 var peertopics = []string{"register", "upload", "filereq", "KeyUpload", "ReceiveKeyUpload", "ReceiveKeyReq", "DataForwarding", "ReceiveFileRequestFromCenter"}
 
 func main() {
-	var nodeinfo = NodeUtils.NodeInfo{
+	var nodeinfo = models.NodeInfo{
 		NodePeerName: os.Getenv("PEER_NODE_NAME"),
 		LeftStorage:  os.Getenv("LEFT_STORAGE"),
 		LocationX:    os.Getenv("LOCATION_X"),

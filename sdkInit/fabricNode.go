@@ -15,8 +15,8 @@ func (t *Application) GetNodeInfo(nodeIp string, endpoint string) ([]byte, error
 	return response.Payload, nil
 }
 
-func (t *Application) SetNodeInfo(nodeIP string, info []byte) (string, error) {
-	request := channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "set", Args: [][]byte{[]byte(nodeIP), info}}
+func (t *Application) SetNodeInfo(PeerNodeName string, info []byte) (string, error) {
+	request := channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "set", Args: [][]byte{[]byte(PeerNodeName), info}}
 	response, err := t.SdkEnvInfo.ChClient.Execute(request)
 	if err != nil {
 		// set失败

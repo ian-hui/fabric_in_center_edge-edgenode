@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/samuel/go-zookeeper/zk"
@@ -75,9 +76,12 @@ func (l *ZooKeeperLock) Lock() error {
 	}
 }
 
-func (l *ZooKeeperLock) Unlock() error {
+func (l *ZooKeeperLock) Unlock() {
 	// 删除锁节点
 	defer l.conn.Close()
-	l.conn.Delete(l.lockPath, -1)
-	return nil
+	err := l.conn.Delete(l.lockPath, -1)
+	if err != nil {
+		log.Println(err)
+	}
+	return
 }
