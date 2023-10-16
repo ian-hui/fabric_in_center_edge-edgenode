@@ -21,9 +21,9 @@ type Nodestructure struct {
 
 type PositionInfo struct {
 	// AreaId   string `json:"AreaId"`
-	FileId     string   `json:"FileId"`
-	Position   string   `json:"Position"`
-	GroupAddrs []string `json:"GroupIps"`
+	FileId        string   `json:"FileId"`
+	FilePosition  string   `json:"FilePosition"`
+	KeyGroupAddrs []string `json:"KeyGroupAddrs"`
 }
 
 type FileInfo struct {
@@ -75,10 +75,10 @@ func (k *KeyDetailInfo) SetKeyFromBase64(encoded string) error {
 	return nil
 }
 
-type KeyPostionUploadInfo struct {
-	FileId     string   `json:"FileId"`
-	GroupAddrs []string `json:"GroupAddrs"`
-}
+// type KeyPostionUploadInfo struct {
+// 	FileId     string   `json:"FileId"`
+// 	GroupAddrs []string `json:"GroupAddrs"`
+// }
 
 type DataSend2clientInfo struct {
 	TransferFlag bool   `json:"TransferFlag"`

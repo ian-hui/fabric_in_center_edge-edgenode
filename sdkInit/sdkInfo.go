@@ -64,10 +64,7 @@ type MyPublicKey struct {
 	X, Y *big.Int
 }
 
-type FileAccessInfo struct {
-	FileId    string
-	Attribute []string
-}
+
 
 type retrieve struct {
 	CurveParams *elliptic.CurveParams `json:"Curve"`

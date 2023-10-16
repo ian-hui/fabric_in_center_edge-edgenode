@@ -1,15 +1,15 @@
-package sdkInit
+package clients
 
 import (
 	"encoding/json"
+	"fabric-edgenode/models"
 	"fmt"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 )
 
-func (t *Application) GetAccess(fileid string, endpoint string) (FileAccessInfo, error) {
-	var fileaccessinfo FileAccessInfo
-	response, err := t.SdkEnvInfo.ChClient.Query(channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "get", Args: [][]byte{[]byte(fileid)}},
+func (t Channel_client) GetAccess(fileid string, endpoint string) (fileaccessinfo models.FileAccessInfo, err error) {
+	response, err := t.ChClient.Query(channel.Request{ChaincodeID: t.ChaincodeID, Fcn: "get", Args: [][]byte{[]byte(fileid)}},
 		channel.WithTargetEndpoints(endpoint))
 	if err != nil {
 		return fileaccessinfo, fmt.Errorf("failed to query: %v", err)
@@ -22,14 +22,14 @@ func (t *Application) GetAccess(fileid string, endpoint string) (FileAccessInfo,
 	return fileaccessinfo, nil
 }
 
-func (t *Application) SetAccess(fileaccessinfo FileAccessInfo) (string, error) {
+func (t Channel_client) SetAccess(fileaccessinfo models.FileAccessInfo) (string, error) {
 	b, err := json.Marshal(fileaccessinfo)
 	if err != nil {
 		return "", fmt.Errorf("指定的fileaccessinfo对象序列化时发生错误")
 	}
 
-	request := channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "set", Args: [][]byte{[]byte(fileaccessinfo.FileId), b}}
-	response, err := t.SdkEnvInfo.ChClient.Execute(request)
+	request := channel.Request{ChaincodeID: t.ChaincodeID, Fcn: "set", Args: [][]byte{[]byte(fileaccessinfo.FileId), b}}
+	response, err := t.ChClient.Execute(request)
 	if err != nil {
 		// set失败
 		return "", err

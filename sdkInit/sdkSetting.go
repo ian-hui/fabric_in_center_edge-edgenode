@@ -469,3 +469,4 @@ func initCC(ccName string, upgrade bool, channelID string, org *OrgInfo, sdk *fa
 	}
 	return nil
 }
+

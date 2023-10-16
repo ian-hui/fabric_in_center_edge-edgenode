@@ -3,6 +3,7 @@ package NodeUtils
 import (
 	"encoding/json"
 	"fabric-edgenode/clients"
+	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 	"fmt"
 	"log"
@@ -36,9 +37,9 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 
 	//密文位置，密钥位置
 	file_postion_info := PositionInfo{
-		FileId:   fileif.FileId,
-		Position: nodestru.KafkaIp,
-		// GroupAddrs: group,
+		FileId:       fileif.FileId,
+		FilePosition: nodestru.KafkaIp,
+		// KeyGroupAddrs: group,
 	}
 	res, err := json.Marshal(file_postion_info)
 	if err != nil {
@@ -80,7 +81,7 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	}
 
 	//set access in fabric
-	_, err = clients.GetPeerFabric(nodestru.PeerNodeName, "access").SetAccess(sdkInit.FileAccessInfo{
+	_, err = clients.GetPeerFabric(nodestru.PeerNodeName, "access").SetAccess(models.FileAccessInfo{
 		FileId:    (*keyinfostru.Upload_Infomation)[nodestru.KafkaIp].FileId,
 		Attribute: keyinfostru.Attribute,
 	})
@@ -88,9 +89,9 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 		return fmt.Errorf("keyupload set access error:%v", err)
 	}
 	//send position to center
-	res, err := json.Marshal(KeyPostionUploadInfo{
-		FileId:     (*keyinfostru.Upload_Infomation)[nodestru.KafkaIp].FileId,
-		GroupAddrs: group,
+	res, err := json.Marshal(PositionInfo{
+		FileId:        (*keyinfostru.Upload_Infomation)[nodestru.KafkaIp].FileId,
+		KeyGroupAddrs: group,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal error:%v", err)
@@ -103,7 +104,7 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	for KafkaAddr, key_info := range *keyinfostru.Upload_Infomation {
 		var (
 			err              error
-			user_information sdkInit.UserInfo
+			user_information models.UserInfo
 		)
 		if KafkaAddr == nodestru.KafkaIp && check_map[nodestru.KafkaIp] {
 			//check the key not exist
@@ -151,7 +152,7 @@ func receivekeyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	}
 	//check if it already existed
 	if client.CheckNotExistence(k_detail.FileId, "cipherkey_info") {
-		var user_information sdkInit.UserInfo
+		var user_information models.UserInfo
 		//get user pubkey and verify
 		user_information, err = clients.GetPeerFabric(nodestru.PeerNodeName, "user").GetUserInfo(k_detail.UserId, nodestru.PeerNodeName)
 		if err != nil {

@@ -8,10 +8,13 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
 var (
+	sdk     *fabsdk.FabricSDK
 	userApp = &App{
 		channelInfo: &UserinfoChannel_info,
 	}
@@ -23,10 +26,22 @@ var (
 	}
 )
 
+func init() {
+	temp_sdk, err := fabsdk.New(config.FromFile("/conf/config.yaml"))
+	if err != nil {
+		log.Printf("Failed to create new SDK: %s\n", err)
+		panic(fmt.Sprintf(">>channel %s SDK setup error: %v", "/conf/config.yaml", err))
+	}
+	sdk = temp_sdk
+}
+
+type Channel_client struct {
+	ChaincodeID string
+	ChClient    *channel.Client
+}
 type App struct {
 	channelInfo *sdkInit.SdkEnvInfo
-	app         *sdkInit.Application
-	sdk         *fabsdk.FabricSDK
+	cclient     Channel_client
 }
 
 func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *sdkInit.SdkEnvInfo, app *App) error {
@@ -34,17 +49,23 @@ func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *s
 	if err != nil {
 		return err
 	}
-	sdk, err := sdkInit.Setup(path, channel_info)
+	// sdk, err := sdkInit.Setup(path, channel_info)
+	// if err != nil {
+	// 	panic(fmt.Sprintf(">>channel %s SDK setup error: %v", path, err))
+	// }
+	// if err := channel_info.InitService(channel_info.ChaincodeID, channel_info.ChannelID, channel_info.Orgs[orgnum-1], sdk); err != nil {
+	// 	panic(fmt.Sprintf(">>channel %s InitService unsuccessful: %v", path, err))
+	// }
+
+	clientChannelContext1 := sdk.ChannelContext(channel_info.ChannelID, fabsdk.WithUser(channel_info.OrdererAdminUser), fabsdk.WithOrg(channel_info.Orgs[orgnum-1].OrgName))
+	client, err := channel.New(clientChannelContext1)
 	if err != nil {
-		panic(fmt.Sprintf(">>channel %s SDK setup error: %v", path, err))
-	}
-	if err := channel_info.InitService(channel_info.ChaincodeID, channel_info.ChannelID, channel_info.Orgs[orgnum-1], sdk); err != nil {
-		panic(fmt.Sprintf(">>channel %s InitService unsuccessful: %v", path, err))
+		log.Printf("Failed to create new channel client: %s\n", err)
+		return err
 	}
 	*app = App{
 		channelInfo: channel_info,
-		app:         &sdkInit.Application{SdkEnvInfo: channel_info},
-		sdk:         sdk,
+		cclient:     Channel_client{ChaincodeID: channel_info.ChaincodeID, ChClient: client},
 	}
 	return nil
 }
@@ -65,15 +86,14 @@ func InitPeerSdk(PeerNodeAddr string, orgID string, path string) error {
 	return nil
 }
 
-func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
+func GetPeerFabric(PeerNodeName string, app_type string) Channel_client {
 	switch app_type {
 	case "user":
-		a := userApp.app
-		return a
+		return userApp.cclient
 	case "access":
-		return accessApp.app
+		return accessApp.cclient
 	case "node":
-		return nodeApp.app
+		return nodeApp.cclient
 	default:
 		panic(fmt.Sprintln(">>channel", PeerNodeName, "GetPeerFabric error: unknown app type"))
 	}
@@ -81,15 +101,16 @@ func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
 
 func FabricClose() {
 	//close sdk
-	userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(userApp.app.SdkEnvInfo.EvClient))
-	userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(userApp.app.SdkEnvInfo.EvClient, userApp.app.SdkEnvInfo.ChaincodeID))
-	accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(accessApp.app.SdkEnvInfo.EvClient))
-	accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(accessApp.app.SdkEnvInfo.EvClient, accessApp.app.SdkEnvInfo.ChaincodeID))
-	nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(nodeApp.app.SdkEnvInfo.EvClient))
-	nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(nodeApp.app.SdkEnvInfo.EvClient, nodeApp.app.SdkEnvInfo.ChaincodeID))
-	userApp.sdk.Close()
-	accessApp.sdk.Close()
-	nodeApp.sdk.Close()
+	// userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(userApp.app.SdkEnvInfo.EvClient))
+	// userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(userApp.app.SdkEnvInfo.EvClient, userApp.app.SdkEnvInfo.ChaincodeID))
+	// accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(accessApp.app.SdkEnvInfo.EvClient))
+	// accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(accessApp.app.SdkEnvInfo.EvClient, accessApp.app.SdkEnvInfo.ChaincodeID))
+	// nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(nodeApp.app.SdkEnvInfo.EvClient))
+	// nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(nodeApp.app.SdkEnvInfo.EvClient, nodeApp.app.SdkEnvInfo.ChaincodeID))
+	// userApp.sdk.Close()
+	// accessApp.sdk.Close()
+	// nodeApp.sdk.Close()
+	sdk.Close()
 }
 
 func InitNodeInfo(nodeinfo models.NodeInfo) error {

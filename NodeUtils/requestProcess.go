@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fabric-edgenode/clients"
+	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 	"fmt"
 
@@ -78,12 +79,12 @@ func receivekeyReq(nodestru Nodestructure, msg []byte) (err error) {
 	}
 
 	//check user access
-	var user_information sdkInit.UserInfo
+	var user_information models.UserInfo
 	user_information, err = clients.GetPeerFabric(nodestru.PeerNodeName, "user").GetUserInfo(requestinfo.UserId, nodestru.PeerNodeName)
 	if err != nil {
 		fmt.Println(err)
 	}
-	var file_access sdkInit.FileAccessInfo
+	var file_access models.FileAccessInfo
 	file_access, err = clients.GetPeerFabric(nodestru.PeerNodeName, "access").GetAccess(requestinfo.FileId, nodestru.PeerNodeName)
 	if err != nil {
 		fmt.Println(err)
@@ -181,8 +182,8 @@ func receiveFileRequestFormCenter(nodestru Nodestructure, msg []byte) (err error
 	if datasendinginfo.TransferFlag {
 		//change position in center
 		fileposInfo := PositionInfo{
-			FileId:   fileif.FileId,
-			Position: filereqstru.Kafka_addr,
+			FileId:       fileif.FileId,
+			FilePosition: filereqstru.Kafka_addr,
 		}
 		res, err := json.Marshal(fileposInfo)
 		if err != nil {
