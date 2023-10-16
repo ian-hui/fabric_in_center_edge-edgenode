@@ -35,11 +35,11 @@ func NewZooKeeperLock(zkServers []string, lockPath string, nodeaddr string) (*Zo
 		fmt.Println("err")
 		return nil, err
 	}
-	_, err = conn.Create(lockPath+"/"+nodeaddr, nil, 0, acl)
-	if err != nil {
-		fmt.Println("err")
-		return nil, err
-	}
+	// _, err = conn.Create(lockPath+"/"+nodeaddr, nil, 0, acl)
+	// if err != nil {
+	// 	fmt.Println("err")
+	// 	return nil, err
+	// }
 
 	// 获取锁节点编号
 	lockIndex := lockPath[len(lockPath)-10:]
@@ -52,7 +52,7 @@ func (l *ZooKeeperLock) Lock() error {
 	for {
 		// 获取所有锁节点
 		children, _, err := l.conn.Children(l.lockPath[:len(l.lockPath)-11])
-		fmt.Println(children, l.lockPath[:len(l.lockPath)-11])
+		log.Println(children)
 		if err != nil {
 			return err
 		}
@@ -78,10 +78,10 @@ func (l *ZooKeeperLock) Lock() error {
 
 func (l *ZooKeeperLock) Unlock() {
 	// 删除锁节点
-	defer l.conn.Close()
 	err := l.conn.Delete(l.lockPath, -1)
 	if err != nil {
 		log.Println(err)
 	}
-	return
+	log.Println("unlock success")
+	defer l.conn.Close()
 }

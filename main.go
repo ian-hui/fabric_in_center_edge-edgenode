@@ -2,6 +2,7 @@ package main
 
 import (
 	"fabric-edgenode/NodeUtils"
+	"fabric-edgenode/clients"
 	"fabric-edgenode/models"
 	"os"
 
@@ -12,7 +13,8 @@ var peertopics = []string{"register", "upload", "filereq", "KeyUpload", "Receive
 
 func main() {
 	var nodeinfo = models.NodeInfo{
-		NodePeerName: os.Getenv("PEER_NODE_NAME"),
+		KafkaAddr:    os.Getenv("KAFKA_IP"),
+		PeerNodeName: os.Getenv("PEER_NODE_NAME"),
 		LeftStorage:  os.Getenv("LEFT_STORAGE"),
 		LocationX:    os.Getenv("LOCATION_X"),
 		LocationY:    os.Getenv("LOCATION_Y"),
@@ -41,6 +43,7 @@ func main() {
 
 	//init node
 	node.InitPeerNode(peertopics)
+	defer clients.FabricClose()
 	//start websocket
 	go NodeUtils.InitWebsocket()
 

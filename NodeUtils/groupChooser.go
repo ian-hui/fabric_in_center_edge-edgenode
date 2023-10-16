@@ -5,6 +5,7 @@ import (
 	"fabric-edgenode/clients"
 	"fabric-edgenode/models"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"sort"
@@ -35,7 +36,7 @@ type kv struct {
 func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd float64, err error) {
 	var (
 		nodelist              []models.NodeInfo
-		candidate_nodeinfoMap = make(map[string]*processed_nodeinfo)
+		candidate_nodeinfoMap = make(map[string]*processed_nodeinfo) //key是节点名,value是节点信息
 		mindist, maxdist      = math.MaxFloat64, 0.0
 		minstor, maxstor      = math.MaxInt64, 0
 		//创建一个group
@@ -79,8 +80,8 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 		if nodeStorage > maxstor {
 			maxstor = nodeStorage
 		}
-		//候选节点
-		candidate_nodeinfoMap[nodeif.PeerNodeName] = &processed_nodeinfo{
+		//候选节点，用kafka作为key
+		candidate_nodeinfoMap[nodeif.KafkaAddr] = &processed_nodeinfo{
 			distance: dist,
 			storage:  nodeStorage,
 		}
@@ -102,7 +103,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 
 	for i := 0; i < k; i++ {
 		Cur_group = append(Cur_group, sortedMap[i].Key)
-		//选择这些节点
+		//计算延迟
 		delay += candidate_nodeinfoMap[sortedMap[i].Key].distance * 100
 		//减少这些节点的剩余空间
 		b, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.PeerNodeName)
@@ -121,7 +122,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 		if s, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").SetNodeInfo(node.PeerNodeName, res); err != nil {
 			return nil, 0, 0, fmt.Errorf("SetNodeInfo error: %v", err)
 		} else {
-			fmt.Println(s)
+			log.Println("SetNodeInfo success:", node.PeerNodeName, "setting leftstroage", node.LeftStorage, "the transactionID is ", s)
 		}
 	}
 	//平均延迟

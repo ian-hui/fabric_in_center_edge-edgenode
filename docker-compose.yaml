@@ -240,9 +240,9 @@ services:
       - LOCATION_X=7
       - LOCATION_Y=6
       - ZOOKEEPER_ADDR=zookeeper:2181
-      - KAFKA_IP=peer1_org1_kafka:9092
+      - KAFKA_IP=kafka1:9092
       - COUCHDB_ADDR=http://admin:123456@couchdb1:5984
-      - PEER_NODE_NAME=peer1.org1.example.com:7051
+      - PEER_NODE_NAME=peer1.org1.example.com:8051
       - ORG_ID=1
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -256,7 +256,7 @@ services:
       - "7280:8080"
       - "7283:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org2conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -266,7 +266,7 @@ services:
       - KAFKA_IP=kafka2:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb2:5984
-      - PEER_NODE_NAME=peer0.org2.example.com:7051
+      - PEER_NODE_NAME=peer0.org2.example.com:9051
       - ORG_ID=2
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -280,7 +280,7 @@ services:
       - "7380:8080"
       - "7383:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org2conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -290,7 +290,7 @@ services:
       - KAFKA_IP=kafka3:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb3:5984
-      - PEER_NODE_NAME=peer1.org2.example.com:7051
+      - PEER_NODE_NAME=peer1.org2.example.com:10051
       - ORG_ID=2
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -304,7 +304,7 @@ services:
       - "7480:8080"
       - "7483:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org3conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -314,7 +314,7 @@ services:
       - KAFKA_IP=kafka4:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb4:5984
-      - PEER_NODE_NAME=peer0.org3.example.com:7051
+      - PEER_NODE_NAME=peer0.org3.example.com:11051
       - ORG_ID=3
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -328,7 +328,7 @@ services:
       - "7580:8080"
       - "7583:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org3conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -338,7 +338,7 @@ services:
       - KAFKA_IP=kafka5:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb5:5984
-      - PEER_NODE_NAME=peer1.org3.example.com:7051
+      - PEER_NODE_NAME=peer1.org3.example.com:12051
       - ORG_ID=3
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -352,7 +352,7 @@ services:
       - "7680:8080"
       - "7683:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org4conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -362,7 +362,7 @@ services:
       - KAFKA_IP=kafka6:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb6:5984
-      - PEER_NODE_NAME=peer0.org4.example.com:7051
+      - PEER_NODE_NAME=peer0.org4.example.com:13051
       - ORG_ID=4
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org4.example.com/peers/peer0.org4.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092
@@ -376,7 +376,7 @@ services:
       - "7780:8080"
       - "7783:8083"
     volumes:
-      - ./cfg/org1conf.yaml:/conf/config.yaml
+      - ./cfg/org4conf.yaml:/conf/config.yaml
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
@@ -386,7 +386,7 @@ services:
       - KAFKA_IP=kafka7:9092
       - ZOOKEEPER_ADDR=zookeeper:2181
       - COUCHDB_ADDR=http://admin:123456@couchdb7:5984
-      - PEER_NODE_NAME=peer1.org4.example.com:7051
+      - PEER_NODE_NAME=peer1.org4.example.com:14051
       - ORG_ID=4
       - KEY_PATH=/fixtures/crypto-config/peerOrganizations/org4.example.com/peers/peer1.org4.example.com/msp/keystore/priv_sk
       - CENTER_ADDR=centerkafka:9092

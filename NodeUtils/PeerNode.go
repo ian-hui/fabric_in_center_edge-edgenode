@@ -26,13 +26,21 @@ var transmitTime = time.Minute * 30
 // 初始化节点consumer producer
 // topic：register，upload，filereq,KeyUpload
 func (nodestru Nodestructure) InitPeerNode(topics []string) {
-	//init kafka producer
-	clients.InitProducer(nodestru.KafkaIp)
 
 	//initpeer
 	if err := clients.InitPeerSdk(nodestru.PeerNodeName, nodestru.OrgID, nodestru.ConfigPath); err != nil {
 		log.Println("init peer sdk error:", err)
 	}
+	// defer clients.ClosePeerSdk(nodestru.PeerNodeName)
+	// nodeInfo_byte, err := json.Marshal(nodestru.NodeInfo)
+	// if err != nil {
+	// 	log.Println("marshal nodeinfo error:", err)
+	// }
+	// s, err := clients.GetPeerFabric(nodestru.PeerNodeName, "node").SetNodeInfo(nodestru.PeerNodeName, nodeInfo_byte)
+	// if err != nil {
+	// 	log.Println("SetNodeInfo error: %v", err)
+	// }
+	//先把节点初始信息上传到区块链
 	if err := clients.InitNodeInfo(*nodestru.NodeInfo); err != nil {
 		log.Println("init node info error:", err)
 	}
@@ -47,6 +55,7 @@ func (nodestru Nodestructure) InitPeerNode(topics []string) {
 	if err := c.Create_cipherkey_info(); err != nil {
 		log.Println("create cipherkey_info db error:", err)
 	}
+
 	var wg sync.WaitGroup
 	wg.Add(8)
 	consumer1, err := clients.InitConsumer(nodestru.KafkaIp)

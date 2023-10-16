@@ -27,7 +27,7 @@ func (t *Application) SetNodeInfo(PeerNodeName string, info []byte) (string, err
 }
 
 func (t *Application) GetNodeInfoAllRange(endpoint string) ([]byte, error) {
-	response, err := t.SdkEnvInfo.ChClient.Query(channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "rangeQuery", Args: [][]byte{[]byte("p"), []byte("q")}},
+	response, err := t.SdkEnvInfo.ChClient.Query(channel.Request{ChaincodeID: t.SdkEnvInfo.ChaincodeID, Fcn: "rangeQuery", Args: [][]byte{[]byte("k"), []byte("l")}},
 		channel.WithTargetEndpoints(endpoint))
 	if err != nil {
 		return nil, fmt.Errorf("failed to query: %v", err)

@@ -76,8 +76,8 @@ func (k *KeyDetailInfo) SetKeyFromBase64(encoded string) error {
 }
 
 type KeyPostionUploadInfo struct {
-	FileId   string   `json:"FileId"`
-	GroupIps []string `json:"GroupIps"`
+	FileId     string   `json:"FileId"`
+	GroupAddrs []string `json:"GroupAddrs"`
 }
 
 type DataSend2clientInfo struct {

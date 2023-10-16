@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+
+	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
 var (
@@ -24,6 +26,7 @@ var (
 type App struct {
 	channelInfo *sdkInit.SdkEnvInfo
 	app         *sdkInit.Application
+	sdk         *fabsdk.FabricSDK
 }
 
 func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *sdkInit.SdkEnvInfo, app *App) error {
@@ -41,6 +44,7 @@ func Constructor(PeerNodeAddr string, orgID string, path string, channel_info *s
 	*app = App{
 		channelInfo: channel_info,
 		app:         &sdkInit.Application{SdkEnvInfo: channel_info},
+		sdk:         sdk,
 	}
 	return nil
 }
@@ -64,7 +68,6 @@ func InitPeerSdk(PeerNodeAddr string, orgID string, path string) error {
 func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
 	switch app_type {
 	case "user":
-		fmt.Println(userApp)
 		a := userApp.app
 		return a
 	case "access":
@@ -76,13 +79,26 @@ func GetPeerFabric(PeerNodeName string, app_type string) *sdkInit.Application {
 	}
 }
 
+func FabricClose() {
+	//close sdk
+	userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(userApp.app.SdkEnvInfo.EvClient))
+	userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(userApp.app.SdkEnvInfo.EvClient, userApp.app.SdkEnvInfo.ChaincodeID))
+	accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(accessApp.app.SdkEnvInfo.EvClient))
+	accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(accessApp.app.SdkEnvInfo.EvClient, accessApp.app.SdkEnvInfo.ChaincodeID))
+	nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(nodeApp.app.SdkEnvInfo.EvClient))
+	nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(nodeApp.app.SdkEnvInfo.EvClient, nodeApp.app.SdkEnvInfo.ChaincodeID))
+	userApp.sdk.Close()
+	accessApp.sdk.Close()
+	nodeApp.sdk.Close()
+}
+
 func InitNodeInfo(nodeinfo models.NodeInfo) error {
 	//初始化节点信息
 	nodeInfo_byte, err := json.Marshal(nodeinfo)
 	if err != nil {
 		return fmt.Errorf("json.Marshal error: %v", err)
 	}
-	s, err := GetPeerFabric(nodeinfo.PeerNodeName, "node").SetNodeInfo(nodeinfo.PeerNodeName, nodeInfo_byte)
+	s, err := GetPeerFabric(nodeinfo.PeerNodeName, "node").SetNodeInfo(nodeinfo.KafkaAddr, nodeInfo_byte)
 	if err != nil {
 		return fmt.Errorf("SetNodeInfo error: %v", err)
 	}

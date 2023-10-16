@@ -77,8 +77,7 @@ func (client *CouchdbClient) Create_cipherkey_info() error { //create db in couc
 // }
 
 func (client *CouchdbClient) CouchdbPut(id string, m map[string]interface{}, dbname string) error {
-	// json_fileposif := structs.Map(&f) //转格式，详细看https://github.com/go-kivik/kivik
-	db := client.C.DB("ciphertext_info", nil) //连接couchdb中的cipher_info数据库
+	db := client.C.DB(dbname, nil)            //连接couchdb中的cipher_info数据库
 	rev, err := db.Put(context.TODO(), id, m) //把数据info上传到db
 	if err != nil {
 		client.CouchdbPut(id, m, dbname)

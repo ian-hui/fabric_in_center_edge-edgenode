@@ -63,7 +63,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 	}
 	Option := string(msg)
 	if Option == "1" {
-		fmt.Println("websocket start")
+		log.Println("websocket processing...")
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
 			log.Println("failed to readmessage : ", err)

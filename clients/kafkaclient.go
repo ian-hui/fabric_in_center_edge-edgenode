@@ -2,12 +2,14 @@ package clients
 
 import (
 	"fmt"
+	"log"
+	"sync"
 
 	"github.com/IBM/sarama"
 )
 
 var (
-	producerConns *sarama.AsyncProducer
+	producerConns sync.Map
 )
 
 func InitProducer(kafka_addr string) error {
@@ -18,23 +20,33 @@ func InitProducer(kafka_addr string) error {
 	if err != nil {
 		return fmt.Errorf("init kafka producer error: %v", err)
 	}
-	fmt.Println("producer" + kafka_addr + "init success")
-	producerConns = &producer
+	log.Println("producer" + kafka_addr + "init success")
+	producerConns.Store(kafka_addr, producer)
 	return nil
 }
 
 func GetProducer(kafka_addr string) sarama.AsyncProducer {
-	if producerConns == nil {
+	if v, ok := producerConns.Load(kafka_addr); !ok {
 		mu.Lock()
 		defer mu.Unlock()
-		if producerConns == nil {
+		//拿了锁发现还没有线程初始化，那么就初始化
+		if _, ok := producerConns.Load(kafka_addr); !ok {
 			err := InitProducer(kafka_addr)
 			if err != nil {
 				panic(err)
 			}
+			v, _ := producerConns.Load(kafka_addr)
+			return v.(sarama.AsyncProducer)
 		}
+	} else {
+		return v.(sarama.AsyncProducer)
 	}
-	return *producerConns
+	//等待锁的时候已经被其他线程初始化了，直接查询然后返回
+	if v, ok := producerConns.Load(kafka_addr); !ok {
+		panic("producer init error")
+	} else {
+		return v.(sarama.AsyncProducer)
+	}
 }
 
 func InitConsumer(kafka_addr string) (sarama.Consumer, error) {

@@ -88,7 +88,8 @@ var (
 			OrgUser:       "User1",
 			OrgPeerNum:    2,
 			OrgAnchorFile: "/fixtures/channel-artifacts/Org2MSPanchors_nodeinfoChannel.tx",
-		}, {
+		},
+		{
 			OrgAdminUser:  "Admin",
 			OrgName:       "Org3",
 			OrgMspId:      "Org3MSP",
