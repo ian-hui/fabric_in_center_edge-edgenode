@@ -6,6 +6,8 @@ import (
 	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 	"fmt"
+
+	"github.com/cloudflare/cfssl/log"
 )
 
 func register(nodestru Nodestructure, msg []byte) (err error) {
@@ -21,6 +23,6 @@ func register(nodestru Nodestructure, msg []byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("register set error:%v", err)
 	}
-	fmt.Println(userinfo.Username, " set success,the transactionID is ", ret, " and userid is ", userinfo.UserId)
+	log.Info(userinfo.Username, " set success,the transactionID is ", ret, " and userid is ", userinfo.UserId)
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"fabric-edgenode/NodeUtils"
 	"fabric-edgenode/clients"
 	"fabric-edgenode/models"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ func main() {
 	var nodeinfo = models.NodeInfo{
 		KafkaAddr:    os.Getenv("KAFKA_IP"),
 		PeerNodeName: os.Getenv("PEER_NODE_NAME"),
+		NodeName:     os.Getenv("SERVICE_NODE_HOST"),
 		LeftStorage:  os.Getenv("LEFT_STORAGE"),
 		LocationX:    os.Getenv("LOCATION_X"),
 		LocationY:    os.Getenv("LOCATION_Y"),
@@ -30,7 +32,8 @@ func main() {
 		ConfigPath:    "/conf/config.yaml",
 		NodeInfo:      &nodeinfo,
 	}
-
+	log.Println("nodeinfo:", nodeinfo)
+	log.Println("node:", node)
 	// var node = NodeUtils.Nodestructure{
 	// 	KafkaIp:      "0.0.0.0:9092",
 	// 	Couchdb_addr: "http://admin:123456@couchdb0:5984",

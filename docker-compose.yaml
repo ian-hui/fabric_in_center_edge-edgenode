@@ -212,6 +212,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer0-org1
       - LEFT_STORAGE=20
       - LOCATION_X=15
       - LOCATION_Y=4
@@ -236,6 +237,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer1-org1
       - LEFT_STORAGE=20
       - LOCATION_X=7
       - LOCATION_Y=6
@@ -260,6 +262,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer0-org2
       - LEFT_STORAGE=20
       - LOCATION_X=17
       - LOCATION_Y=12
@@ -284,6 +287,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer1-org2
       - LEFT_STORAGE=20
       - LOCATION_X=9
       - LOCATION_Y=14
@@ -308,6 +312,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer0-org3
       - LEFT_STORAGE=20
       - LOCATION_X=0
       - LOCATION_Y=15
@@ -332,6 +337,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer1-org3
       - LEFT_STORAGE=20
       - LOCATION_X=7
       - LOCATION_Y=18
@@ -356,6 +362,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer0-org4
       - LEFT_STORAGE=20
       - LOCATION_X=1
       - LOCATION_Y=3
@@ -380,6 +387,7 @@ services:
       - ./fixtures:/fixtures
       - ./kafka_crypto:/kafka_crypto
     environment:
+      - SERVICE_NODE_HOST=edgenode-peer1-org4
       - LEFT_STORAGE=20
       - LOCATION_X=3
       - LOCATION_Y=7

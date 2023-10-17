@@ -5,11 +5,12 @@ import (
 	"fabric-edgenode/clients"
 	"fabric-edgenode/models"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"sort"
 	"strconv"
+
+	"github.com/cloudflare/cfssl/log"
 )
 
 type groupChooser struct {
@@ -29,26 +30,26 @@ type processed_nodeinfo struct {
 
 // 将 map 的键和值复制到一个切片中
 type kv struct {
-	Key   string
+	Key   models.NodeInfo
 	Value float64
 }
 
-func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd float64, err error) {
+func (g *groupChooser) chooseGroup(k int) (Cur_group [][]string, delay float64, sd float64, err error) {
 	var (
 		nodelist              []models.NodeInfo
-		candidate_nodeinfoMap = make(map[string]*processed_nodeinfo) //key是节点名,value是节点信息
+		candidate_nodeinfoMap = make(map[models.NodeInfo]*processed_nodeinfo) //key是节点名,value是节点信息
 		mindist, maxdist      = math.MaxFloat64, 0.0
 		minstor, maxstor      = math.MaxInt64, 0
 		//创建一个group
 	)
-	Cur_group = make([]string, 0)
+	Cur_group = make([][]string, 0)
 
 	//获取所有节点的距离以及剩余空间信息
 	nodelist_byte, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfoAllRange(g.curNodeInfo.PeerNodeName)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("GetNodeInfoAllRange error: %v", err)
 	}
-	fmt.Println(string(nodelist_byte))
+	log.Info(string(nodelist_byte))
 	//nodelist_byte 转化为 nodelist
 	if err := json.Unmarshal(nodelist_byte, &nodelist); err != nil {
 		return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
@@ -81,7 +82,7 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 			maxstor = nodeStorage
 		}
 		//候选节点，用kafka作为key
-		candidate_nodeinfoMap[nodeif.KafkaAddr] = &processed_nodeinfo{
+		candidate_nodeinfoMap[nodeif] = &processed_nodeinfo{
 			distance: dist,
 			storage:  nodeStorage,
 		}
@@ -102,27 +103,28 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 	}
 
 	for i := 0; i < k; i++ {
-		Cur_group = append(Cur_group, sortedMap[i].Key)
+		Cur_group = append(Cur_group, []string{sortedMap[i].Key.NodeName, sortedMap[i].Key.KafkaAddr})
 		//计算延迟
 		delay += candidate_nodeinfoMap[sortedMap[i].Key].distance * 100
 		//减少这些节点的剩余空间
-		b, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.PeerNodeName)
-		if err != nil {
-			return nil, 0, 0, fmt.Errorf("GetNodeInfo error: %v", err)
-		}
-		var node models.NodeInfo
-		if err := json.Unmarshal(b, &node); err != nil {
-			return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
-		}
+		// b, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").GetNodeInfo(sortedMap[i].Key, g.curNodeInfo.PeerNodeName)
+		// if err != nil {
+		// 	return nil, 0, 0, fmt.Errorf("GetNodeInfo error: %v", err)
+		// }
+		// var node models.NodeInfo
+		// if err := json.Unmarshal(b, &node); err != nil {
+		// 	return nil, 0, 0, fmt.Errorf("json.Unmarshal error: %v", err)
+		// }
+		node := sortedMap[i].Key
 		node.LeftStorage = strconv.Itoa(candidate_nodeinfoMap[sortedMap[i].Key].storage - 1)
-		res, err := json.Marshal(node)
+		res, err := json.Marshal(sortedMap[i].Key)
 		if err != nil {
 			return nil, 0, 0, fmt.Errorf("json.Marshal error: %v", err)
 		}
-		if s, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").SetNodeInfo(node.PeerNodeName, res); err != nil {
+		if s, err := clients.GetPeerFabric(g.curNodeInfo.PeerNodeName, "node").SetNodeInfo(node.KafkaAddr, res); err != nil {
 			return nil, 0, 0, fmt.Errorf("SetNodeInfo error: %v", err)
 		} else {
-			log.Println("SetNodeInfo success:", node.PeerNodeName, "setting leftstroage", node.LeftStorage, "the transactionID is ", s)
+			log.Info("SetNodeInfo success:", node.PeerNodeName, "setting leftstroage", node.LeftStorage, "the transactionID is ", s)
 		}
 	}
 	//平均延迟
@@ -133,19 +135,19 @@ func (g *groupChooser) chooseGroup(k int) (Cur_group []string, delay float64, sd
 func euclideanDistance(n1, n2 *models.NodeInfo) float64 {
 	n1x, err := strconv.ParseFloat(n1.LocationX, 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 	}
 	n1y, err := strconv.ParseFloat(n1.LocationY, 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 	}
 	n2x, err := strconv.ParseFloat(n2.LocationX, 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 	}
 	n2y, err := strconv.ParseFloat(n2.LocationY, 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Info(err)
 	}
 	return math.Sqrt(math.Pow(n1x-n2x, 2) + math.Pow(n1y-n2y, 2))
 }
@@ -158,7 +160,7 @@ func normalized(dist, stor, mindist, maxdist float64, minstor, maxstor int) (flo
 }
 
 // 排序
-func sortMap(m map[string]*processed_nodeinfo) []kv {
+func sortMap(m map[models.NodeInfo]*processed_nodeinfo) []kv {
 	var ss []kv
 	for k, v := range m {
 		ss = append(ss, kv{k, v.score})
@@ -270,7 +272,7 @@ func NewGroupChooser(curNodeInfo *models.NodeInfo, storage_weight, distance_weig
 	}
 }
 
-func (gc *groupChooser) ChooseGroupWithLock(nodestru Nodestructure) (group []string, delay float64, sd float64, err error) {
+func (gc *groupChooser) ChooseGroupWithLock(nodestru Nodestructure) (group [][]string, delay float64, sd float64, err error) {
 	//获取分布式锁
 	zkl, err := clients.NewZooKeeperLock([]string{nodestru.ZookeeperAddr}, "/mylock", nodestru.KafkaIp)
 	if err != nil {

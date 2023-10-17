@@ -98,10 +98,9 @@ func AsyncSend2Kafka(client sarama.AsyncProducer, msg *sarama.ProducerMessage, c
 	go func() {
 		select {
 		case success := <-client.Successes():
-			fmt.Println("message sent successfully")
-			fmt.Printf("partition:%v offset:%v\n", success.Partition, success.Offset)
+			log.Infof("partition:%v offset:%v topic:%v\n", success.Partition, success.Offset, success.Topic)
 		case err := <-client.Errors():
-			panic(err)
+			log.Critical(err)
 		}
 	}()
 	return nil
@@ -173,9 +172,9 @@ func CipherPosTransfer(FileId string, nodestru Nodestructure, addr string) error
 	if resultSet.Err() != nil {
 		//not found
 		if kivik.StatusCode(resultSet.Err()) == 404 {
-			fmt.Println("<------file ", FileId, " Not found in this node------>")
+			log.Info("<------file ", FileId, " Not found in this node------>")
 		} else {
-			fmt.Println("db.get error:", resultSet.Err())
+			log.Error("db.get error:", resultSet.Err())
 		}
 		return resultSet.Err()
 	}
@@ -183,7 +182,7 @@ func CipherPosTransfer(FileId string, nodestru Nodestructure, addr string) error
 	var fileinfotempdto FileRequestDTO
 	err = resultSet.ScanDoc(&fileinfotempdto)
 	if err != nil {
-		fmt.Println("scandoc error: ", err)
+		log.Error("scandoc error: ", err)
 		return err
 	}
 	//ciphertext info
@@ -223,7 +222,7 @@ func consumerTopic(consumer sarama.Consumer, nodestru Nodestructure, wg *sync.Wa
 				log.Errorf("f error: %v", err)
 			}
 		case <-partitonConsumer.Errors():
-			fmt.Println(errorMessage)
+			log.Critical(errorMessage)
 		}
 	}
 }

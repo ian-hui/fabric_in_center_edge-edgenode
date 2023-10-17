@@ -6,11 +6,12 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cloudflare/cfssl/log"
 
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/vault/shamir"
@@ -29,14 +30,14 @@ var (
 
 func InitWebsocket() {
 	http.HandleFunc("/ws", WebsocketStarter)
-	fmt.Println("websocket start")
+	log.Info("<----- websocket start ------>")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func WebsocketStarter(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 	go HandleWebsocket(conn)
@@ -48,31 +49,31 @@ func HandleWebsocket(ws *websocket.Conn) {
 	welcomeMessage := "请选择:1.上传密钥2.请求密文密钥"
 	err := ws.WriteJSON(welcomeMessage)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 	//first time receive (choose service)
 	_, msg, err := ws.ReadMessage()
 	if err != nil {
-		log.Println("failed to readmessage : ", err)
+		log.Error("failed to readmessage : ", err)
 		return
 	}
 	if len(msg) == 0 {
-		log.Println("failed to readmessage : ", err)
+		log.Error("failed to readmessage : ", err)
 		return
 	}
 	Option := string(msg)
 	if Option == "1" {
-		log.Println("websocket processing...")
+		log.Error("websocket processing...")
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
-			log.Println("failed to readmessage : ", err)
+			log.Error("failed to readmessage : ", err)
 			return
 		}
 		var test_D Test_data
 		err = json.Unmarshal(msg, &test_D)
 		if err != nil {
-			log.Println("failed to unmarshal : ", err)
+			log.Error("failed to unmarshal : ", err)
 			return
 		}
 
@@ -121,7 +122,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 		str := strings.Repeat("a", 16)
 		secrets, err := shamir.Split([]byte(str), 8, 3)
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 
 		//test
@@ -141,14 +142,14 @@ func HandleWebsocket(ws *websocket.Conn) {
 		}
 		res, err = json.Marshal(keyuploadinfo)
 		if err != nil {
-			log.Printf("fail to Serialization, err:%v\n", err)
+			log.Info("fail to Serialization, err:%v\n", err)
 			return
 		}
 		err = ProducerAsyncSending(res, "KeyUpload", os.Getenv("KAFKA_IP"))
 		if err != nil {
 			err := ws.WriteJSON(err)
 			if err != nil {
-				log.Println("writejson error :", err)
+				log.Error("writejson error :", err)
 			}
 		}
 		ws.WriteJSON("SUCCESS")
@@ -161,7 +162,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 		startTime := time.Now()
 		_, msg, err := ws.ReadMessage()
 		if err != nil {
-			log.Println("failed to readmessage : ", err)
+			log.Error("failed to readmessage : ", err)
 			return
 		}
 		userid := strings.Split(string(msg), ",")[0]
@@ -185,7 +186,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 		if err != nil {
 			err := ws.WriteJSON(err)
 			if err != nil {
-				log.Println("writejson error :", err)
+				log.Error("writejson error :", err)
 			}
 			return
 		}
@@ -197,7 +198,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 				for {
 					select {
 					case <-conn:
-						// fmt.Println(data)
+						// log.Error(data)
 						temp++
 						if temp == 4 {
 							duration := time.Since(startTime)
@@ -206,7 +207,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 							return
 						}
 					case <-time.After(10 * time.Minute):
-						fmt.Println("timeout")
+						log.Error("timeout")
 						return
 					}
 				}

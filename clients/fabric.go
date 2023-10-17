@@ -100,16 +100,6 @@ func GetPeerFabric(PeerNodeName string, app_type string) Channel_client {
 }
 
 func FabricClose() {
-	//close sdk
-	// userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(userApp.app.SdkEnvInfo.EvClient))
-	// userApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(userApp.app.SdkEnvInfo.EvClient, userApp.app.SdkEnvInfo.ChaincodeID))
-	// accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(accessApp.app.SdkEnvInfo.EvClient))
-	// accessApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(accessApp.app.SdkEnvInfo.EvClient, accessApp.app.SdkEnvInfo.ChaincodeID))
-	// nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.BlockListener(nodeApp.app.SdkEnvInfo.EvClient))
-	// nodeApp.app.SdkEnvInfo.EvClient.Unregister(sdkInit.ChainCodeEventListener(nodeApp.app.SdkEnvInfo.EvClient, nodeApp.app.SdkEnvInfo.ChaincodeID))
-	// userApp.sdk.Close()
-	// accessApp.sdk.Close()
-	// nodeApp.sdk.Close()
 	sdk.Close()
 }
 

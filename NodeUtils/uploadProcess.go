@@ -6,14 +6,15 @@ import (
 	"fabric-edgenode/models"
 	"fabric-edgenode/sdkInit"
 	"fmt"
-	"log"
 	"time"
+
+	"github.com/cloudflare/cfssl/log"
 
 	"github.com/fatih/structs"
 )
 
 func upload(nodestru Nodestructure, msg []byte) (err error) {
-	log.Println("begin to upload locally")
+	log.Info("<------ begin to upload locally ------>")
 
 	//先上传密文到本地
 	var fileif FileInfo
@@ -33,21 +34,19 @@ func upload(nodestru Nodestructure, msg []byte) (err error) {
 	}
 
 	//然后把信息上传到center
-	log.Println("<----begin to upload position to center---->")
+	log.Info("<----begin to upload position to center---->")
 
 	//密文位置，密钥位置
 	file_postion_info := PositionInfo{
-		FileId:       fileif.FileId,
-		FilePosition: nodestru.KafkaIp,
-		// KeyGroupAddrs: group,
+		FileId:        fileif.FileId,
+		FilePosition:  nodestru.KafkaIp,
+		KeyGroupAddrs: [][]string{{"", ""}},
 	}
 	res, err := json.Marshal(file_postion_info)
 	if err != nil {
 		return fmt.Errorf("marshal error:%v", err)
 	}
-
-	topic := "uploadposition" //操作名
-	err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
+	err = ProducerAsyncSending(res, "uploadposition", nodestru.CenterAddr)
 	if err != nil {
 		return fmt.Errorf("producer async sending err:%v", err)
 	}
@@ -73,11 +72,11 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 	if err != nil {
 		return fmt.Errorf("keyupload choose group error:%v", err)
 	}
-	log.Println("group:", group)
+	log.Info("group:", group)
 
 	check_map := make(map[string]bool)
 	for i := range group {
-		check_map[group[i]] = true
+		check_map[group[i][1]] = true
 	}
 
 	//set access in fabric
@@ -108,7 +107,7 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 		)
 		if KafkaAddr == nodestru.KafkaIp && check_map[nodestru.KafkaIp] {
 			//check the key not exist
-			log.Println("uploading key to local couchdb...")
+			log.Info("uploading key to local couchdb...")
 			check := client.CheckNotExistence(key_info.FileId, "cipherkey_info")
 			if !check {
 				return fmt.Errorf("keyupload error: key already exist")
@@ -124,7 +123,7 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 				return fmt.Errorf("keyupload upload cipherkey error:%v", err)
 			}
 		} else if check_map[KafkaAddr] {
-			log.Println("sending kafkaAddr to it node:", KafkaAddr, "...")
+			log.Info("sending kafkaAddr to it node:", KafkaAddr, "...")
 			res, err := json.Marshal(key_info)
 			if err != nil {
 				return fmt.Errorf("marshal error:%v", err)
@@ -143,7 +142,7 @@ func keyUpload(nodestru Nodestructure, msg []byte) (err error) {
 
 //各个节点获取到各自的密钥片段
 func receivekeyUpload(nodestru Nodestructure, msg []byte) (err error) {
-	log.Println("receive keyupload request! begin to upload locally")
+	log.Info("<------ receive keyupload request! begin to upload locally ------>")
 	var k_detail KeyDetailInfo
 	json.Unmarshal(msg, &k_detail)
 	client, err := clients.GetCouchdb(nodestru.Couchdb_addr)

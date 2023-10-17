@@ -8,6 +8,8 @@ import (
 	"fabric-edgenode/sdkInit"
 	"fmt"
 
+	"github.com/cloudflare/cfssl/log"
+
 	kivik "github.com/go-kivik/kivik/v4"
 )
 
@@ -65,13 +67,14 @@ func filerequest(nodestru Nodestructure, msg []byte) (err error) {
 	topic := "KeyReqForwarding" //操作名
 	err = ProducerAsyncSending(res, topic, nodestru.CenterAddr)
 	if err != nil {
-		fmt.Println("producer async sending err:", err)
+		log.Error("producer async sending err:", err)
 	}
 	return nil
 }
 
 // 边缘节点接收到中心节点转发的key请求
 func receivekeyReq(nodestru Nodestructure, msg []byte) (err error) {
+	log.Info("receive key request from center")
 	var requestinfo FileRequest
 	err = json.Unmarshal(msg, &requestinfo)
 	if err != nil {
@@ -82,12 +85,12 @@ func receivekeyReq(nodestru Nodestructure, msg []byte) (err error) {
 	var user_information models.UserInfo
 	user_information, err = clients.GetPeerFabric(nodestru.PeerNodeName, "user").GetUserInfo(requestinfo.UserId, nodestru.PeerNodeName)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	var file_access models.FileAccessInfo
 	file_access, err = clients.GetPeerFabric(nodestru.PeerNodeName, "access").GetAccess(requestinfo.FileId, nodestru.PeerNodeName)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 	if IsIdentical(user_information.Attribute, file_access.Attribute) {
 		//take out the key if imformation is match
